@@ -93,11 +93,13 @@ CREATE TABLE [dbo].[ContentItem] (
 	[ContentItemID] [uniqueidentifier] NOT NULL ,
 	[SourceURL] [varchar] (892) NOT NULL ,
 	[NeedVideoCodec] [varchar] (8) NULL ,
+	[RequestedAt] [datetime] NOT NULL ,
 	[Status] [varchar] (16) NOT NULL ,
 	[LocalFilePath] [char] (64) NULL ,
 	[FileSize] [int] NULL ,
 	[VideoCodec] [varchar] (8) NULL ,
-	[AudioCodec] [varchar] (8) NULL 
+	[AudioCodec] [varchar] (8) NULL ,
+	[CanRelease] [bit] NOT NULL
 ) ON [PRIMARY]
 GO
 

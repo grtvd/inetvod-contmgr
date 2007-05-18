@@ -1,15 +1,17 @@
 /**
- * Copyright © 2006 iNetVOD, Inc. All Rights Reserved.
+ * Copyright © 2007 iNetVOD, Inc. All Rights Reserved.
  * iNetVOD Confidential and Proprietary.  See LEGAL.txt.
  */
 package com.inetvod.contmgr.processor;
 
-import java.util.Properties;
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.util.Date;
+import java.util.Properties;
 
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
+import com.inetvod.contmgr.dbdata.ContentItem;
 
 public class MainApp
 {
@@ -25,6 +27,7 @@ public class MainApp
 	}
 
 	/* Implementation */
+	@SuppressWarnings({"ACCESS_STATIC_VIA_INSTANCE"})
 	public static void main(String[] args)
 	{
 		try
@@ -61,13 +64,14 @@ public class MainApp
 		DatabaseAdaptor.setDBConnectFile(properties.getProperty("dbconnect"));
 
 		// Preload DatabaseAdaptors
-		//ContentItem.getDatabaseAdaptor();
+		ContentItem.getDatabaseAdaptor();
 	}
 
 	private static boolean processArgs(String[] args)
 	{
 		try
 		{
+			//noinspection RedundantIfStatement
 			if((args == null) || (args.length == 0))
 				return true;
 
@@ -117,8 +121,11 @@ public class MainApp
 		System.out.println("   -pc <ProviderConnectionID>");
 	}
 
-	private void doWork() throws Exception
+	private static void doWork() throws Exception
 	{
-
+		ContentItem contentItem = ContentItem.getCreate("a");
+		contentItem.setRequestedAt(new Date());
+		contentItem.setStatus("ToDownload");
+		contentItem.update();
 	}
 }

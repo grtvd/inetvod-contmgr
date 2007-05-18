@@ -4,8 +4,12 @@
   <component name="NewModuleRootManager">
     <output url="file://$MODULE_DIR$/classes" />
     <exclude-output />
+    <content url="file://$MODULE_DIR$/../../SQL" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../shared">
+      <sourceFolder url="file://$MODULE_DIR$/../../shared" isTestSource="false" />
     </content>
     <content url="file://$MODULE_DIR$/../../../shared/java/com/inetvod/common">
       <sourceFolder url="file://$MODULE_DIR$/../../../shared/java/com/inetvod/common" isTestSource="false" packagePrefix="com.inetvod.common" />
