@@ -8,16 +8,19 @@ import java.util.Date;
 
 import com.inetvod.common.core.DataReader;
 import com.inetvod.common.core.DataWriter;
+import com.inetvod.common.core.FileExtension;
+import com.inetvod.common.core.FileUtil;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.common.dbdata.DatabaseObject;
 import com.inetvod.contmgr.data.ContentItemID;
+import com.inetvod.contmgr.data.ContentItemStatus;
+import com.inetvod.contmgr.data.VideoCodec;
 
 public class ContentItem extends DatabaseObject
 {
 	/* Constants */
 	private static final int SourceURLMaxLength = 892;
 	private static final int NeedVideoCodecMaxLength = 8;
-	private static final int StatusMaxLength = 16;
 	private static final int LocalFilePathMaxLength = 64;
 	private static final int VideoCodecMaxLength = 8;
 	private static final int AudioCodecMaxLength = 8;
@@ -25,12 +28,12 @@ public class ContentItem extends DatabaseObject
 	/* Fields */
 	private ContentItemID fContentItemID;
 	private String fSourceURL;
-	private String fNeedVideoCodec;
+	private VideoCodec fNeedVideoCodec;
 	private Date fRequestedAt;
-	private String fStatus;
+	private ContentItemStatus fStatus;
 	private String fLocalFilePath;
-	private Integer fFileSize;
-	private String fVideoCodec;
+	private Long fFileSize;
+	private VideoCodec fVideoCodec;
 	private String fAudioCodec;
 	private boolean fCanRelease;
 
@@ -41,22 +44,29 @@ public class ContentItem extends DatabaseObject
 	/* Getters and Setters */
 	public ContentItemID getContentItemID() { return fContentItemID; }
 	public String getSourceURL() { return fSourceURL; }
-	public String getNeedVideoCodec() { return fNeedVideoCodec; }
+	public VideoCodec getNeedVideoCodec() { return fNeedVideoCodec; }
 
 	public Date getRequestedAt() { return fRequestedAt; }
 	public void setRequestedAt(Date requestedAt) { fRequestedAt = requestedAt; }
 
-	public String getStatus() { return fStatus; }
-	public void setStatus(String status) { fStatus = status; }
+	public ContentItemStatus getStatus() { return fStatus; }
+	public void setStatus(ContentItemStatus status)
+	{
+		if(ContentItemStatus.ToTranscode.equals(status) && (fVideoCodec == null))
+			throw new IllegalArgumentException("Can't set to ToTranscode when fVideoCodec == null");
+		if(ContentItemStatus.ToDownload.equals(status) && (fVideoCodec != null))
+			throw new IllegalArgumentException("Can't set to ToDownload when fVideoCodec != null");
+		fStatus = status;
+	}
 
 	public String getLocalFilePath() { return fLocalFilePath; }
 	public void setLocalFilePath(String localFilePath) { fLocalFilePath = localFilePath; }
 
-	public Integer getFileSize() { return fFileSize; }
-	public void setFileSize(Integer fileSize) { fFileSize = fileSize; }
+	public Long getFileSize() { return fFileSize; }
+	public void setFileSize(Long fileSize) { fFileSize = fileSize; }
 
-	public String getVideoCodec() { return fVideoCodec; }
-	public void setVideoCodec(String videoCodec) { fVideoCodec = videoCodec; }
+	public VideoCodec getVideoCodec() { return fVideoCodec; }
+	public void setVideoCodec(VideoCodec videoCodec) { fVideoCodec = videoCodec; }
 
 	public String getAudioCodec() { return fAudioCodec; }
 	public void setAudioCodec(String audioCodec) { fAudioCodec = audioCodec; }
@@ -65,12 +75,27 @@ public class ContentItem extends DatabaseObject
 	public void setCanRelease(boolean canRelease) { fCanRelease = canRelease; }
 
 	/* Construction */
-	private ContentItem(String sourceURL, String needVideoCodec)
+	private ContentItem(String sourceURL, VideoCodec needVideoCodec)
 	{
 		super(true);
 		fContentItemID = ContentItemID.newInstance();
+		fRequestedAt = new Date();
 		fSourceURL = sourceURL;
 		fNeedVideoCodec = needVideoCodec;
+
+		if(fNeedVideoCodec == null)
+			fStatus = ContentItemStatus.ToDownload;
+		else
+			fStatus = ContentItemStatus.ToTranscode;
+
+		String localFileName = fContentItemID.toString();
+		FileExtension fileExtension;
+		if(fNeedVideoCodec == null)
+			fileExtension = FileUtil.determineFileExtFromURL(sourceURL);
+		else
+			fileExtension = fNeedVideoCodec.getDefaultFileExtension();
+		fLocalFilePath = String.format("%s/%s", localFileName.substring(0,3),
+			FileUtil.buildFileName(localFileName, fileExtension));
 	}
 
 	public ContentItem(DataReader reader) throws Exception
@@ -79,7 +104,7 @@ public class ContentItem extends DatabaseObject
 		readFrom(reader);
 	}
 
-	public static ContentItem newInstance(String sourceURL, String needVideoCodec)
+	public static ContentItem newInstance(String sourceURL, VideoCodec needVideoCodec)
 	{
 		return new ContentItem(sourceURL, needVideoCodec);
 	}
@@ -89,7 +114,7 @@ public class ContentItem extends DatabaseObject
 		return newInstance(sourceURL, null);
 	}
 
-	public static ContentItem getCreate(String sourceURL, String needVideoCodec) throws Exception
+	public static ContentItem getCreate(String sourceURL, VideoCodec needVideoCodec) throws Exception
 	{
 		ContentItemList contentItemList = ContentItemList.findBySourceURLNeedVideoCodec(sourceURL, needVideoCodec);
 
@@ -112,12 +137,12 @@ public class ContentItem extends DatabaseObject
 	{
 		fContentItemID = reader.readDataID("ContentItemID", ContentItemID.MaxLength, ContentItemID.CtorString);
 		fSourceURL = reader.readString("SourceURL", SourceURLMaxLength);
-		fNeedVideoCodec = reader.readString("NeedVideoCodec", NeedVideoCodecMaxLength);
+		fNeedVideoCodec = VideoCodec.convertFromString(reader.readString("NeedVideoCodec", NeedVideoCodecMaxLength));
 		fRequestedAt = reader.readDateTime("RequestedAt");
-		fStatus = reader.readString("Status", StatusMaxLength);
+		fStatus = ContentItemStatus.convertFromString(reader.readString("Status", ContentItemStatus.MaxLength));
 		fLocalFilePath = reader.readString("LocalFilePath", LocalFilePathMaxLength);
-		fFileSize = reader.readInt("FileSize");
-		fVideoCodec = reader.readString("VideoCodec", VideoCodecMaxLength);
+		fFileSize = reader.readLong("FileSize");
+		fVideoCodec = VideoCodec.convertFromString(reader.readString("VideoCodec", VideoCodecMaxLength));
 		fAudioCodec = reader.readString("AudioCodec", AudioCodecMaxLength);
 		fCanRelease = reader.readBooleanValue("CanRelease");
 	}
@@ -126,12 +151,12 @@ public class ContentItem extends DatabaseObject
 	{
 		writer.writeDataID("ContentItemID", fContentItemID, ContentItemID.MaxLength);
 		writer.writeString("SourceURL", fSourceURL, SourceURLMaxLength);
-		writer.writeString("NeedVideoCodec", fNeedVideoCodec, NeedVideoCodecMaxLength);
+		writer.writeString("NeedVideoCodec", VideoCodec.convertToString(fNeedVideoCodec), NeedVideoCodecMaxLength);
 		writer.writeDateTime("RequestedAt", fRequestedAt);
-		writer.writeString("Status", fStatus, StatusMaxLength);
+		writer.writeString("Status", ContentItemStatus.convertToString(fStatus), ContentItemStatus.MaxLength);
 		writer.writeString("LocalFilePath", fLocalFilePath, LocalFilePathMaxLength);
-		writer.writeInt("FileSize", fFileSize);
-		writer.writeString("VideoCodec", fVideoCodec, VideoCodecMaxLength);
+		writer.writeLong("FileSize", fFileSize);
+		writer.writeString("VideoCodec", VideoCodec.convertToString(fVideoCodec), VideoCodecMaxLength);
 		writer.writeString("AudioCodec", fAudioCodec, AudioCodecMaxLength);
 		writer.writeBooleanValue("CanRelease", fCanRelease);
 	}

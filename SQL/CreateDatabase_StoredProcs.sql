@@ -24,6 +24,10 @@ if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentIte
 drop procedure [dbo].[ContentItemList_GetBySourceURLNeedVideoCodec]
 GO
 
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByOldestStatus]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_GetByOldestStatus]
+GO
+
 --//////////////////////////////////////////////////////////////////////////////
 
 SET QUOTED_IDENTIFIER ON
@@ -39,8 +43,8 @@ CREATE PROCEDURE dbo.ContentItem_Insert
 	@NeedVideoCodec varchar(8),
 	@RequestedAt datetime,
 	@Status varchar(16),
-	@LocalFilePath char(64),
-	@FileSize int,
+	@LocalFilePath varchar(64),
+	@FileSize bigint,
 	@VideoCodec varchar(8),
 	@AudioCodec varchar(8),
 	@CanRelease bit
@@ -81,8 +85,8 @@ CREATE PROCEDURE dbo.ContentItem_Update
 	@NeedVideoCodec varchar(8),
 	@RequestedAt datetime,
 	@Status varchar(16),
-	@LocalFilePath char(64),
-	@FileSize int,
+	@LocalFilePath varchar(64),
+	@FileSize bigint,
 	@VideoCodec varchar(8),
 	@AudioCodec varchar(8),
 	@CanRelease bit
@@ -123,10 +127,23 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
+CREATE PROCEDURE dbo.ContentItemList_GetByOldestStatus
+	@Status varchar(16)
+AS
+	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
+		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+	from ContentItem
+	where Status = @Status
+	order by RequestedAt
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
 GRANT EXECUTE ON [dbo].[ContentItem_Insert] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_Update] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_GetAll] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySourceURLNeedVideoCodec] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_GetByOldestStatus] TO [contmgr]
 
 --//////////////////////////////////////////////////////////////////////////////
 

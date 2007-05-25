@@ -95,8 +95,8 @@ CREATE TABLE [dbo].[ContentItem] (
 	[NeedVideoCodec] [varchar] (8) NULL ,
 	[RequestedAt] [datetime] NOT NULL ,
 	[Status] [varchar] (16) NOT NULL ,
-	[LocalFilePath] [char] (64) NULL ,
-	[FileSize] [int] NULL ,
+	[LocalFilePath] [varchar] (64) NULL ,
+	[FileSize] [bigint] NULL ,
 	[VideoCodec] [varchar] (8) NULL ,
 	[AudioCodec] [varchar] (8) NULL ,
 	[CanRelease] [bit] NOT NULL
@@ -113,7 +113,12 @@ GO
  CREATE  UNIQUE  INDEX [IX_ContentItem_SourceURL] ON [dbo].[ContentItem]([SourceURL], [NeedVideoCodec]) ON [PRIMARY]
 GO
 
-
+CREATE NONCLUSTERED INDEX [IX_ContentItem_StatusRequestedAt] ON [dbo].[ContentItem]
+	(
+	Status,
+	RequestedAt
+	) ON [PRIMARY]
+GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
