@@ -128,9 +128,10 @@ public class MainApp
 
 	private static void printUsage()
 	{
-		System.out.println("usage: apiservice [options] [args]");
-		System.out.println("   -p <ProviderID>");
-		System.out.println("   -pc <ProviderConnectionID>");
+		System.out.println("usage: process");
+//		System.out.println("usage: process [options] [args]");
+//		System.out.println("   -p <ProviderID>");
+//		System.out.println("   -pc <ProviderConnectionID>");
 	}
 
 	private void doWork() throws Exception
@@ -144,7 +145,7 @@ public class MainApp
 		}
 	}
 
-	private void processRequest(String sourceURL, VideoCodec needVideoCodec) throws Exception
+	private static void processRequest(String sourceURL, VideoCodec needVideoCodec) throws Exception
 	{
 		ContentItem contentItem = ContentItem.getCreate(sourceURL, needVideoCodec);
 
