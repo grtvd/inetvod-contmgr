@@ -7,30 +7,39 @@ package com.inetvod.contmgr.processor;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 
 import com.inetvod.common.core.Logger;
+import com.inetvod.common.core.StrUtil;
+import com.inetvod.contmgr.data.VideoCodec;
 
 public class VCLManager
 {
 	/* Fields */
 	private static String fVLCApp;
-	private static String fTranscodeCommand; //= "-I dummy --quiet -vvv \"%s\" --sout '#transcode{vcodec=WMV2,vb=1024,scale=1,acodec=mp3,ab=192,channels=2}:standard{access=file,mux=asf,dst=\"%s\"}' vlc:quit";
+	//private static String fTranscodeCommand; //= "-I dummy --quiet -vvv \"%s\" --sout '#transcode{vcodec=WMV2,vb=1024,scale=1,acodec=mp3,ab=192,channels=2}:standard{access=file,mux=asf,dst=\"%s\"}' vlc:quit";
+	private static HashMap<VideoCodec, String> fTranscodeCommands;
 	private static boolean fLogProcessOutput;
 
 	/* Getters and Setters */
 
 	/* Construction */
-	public static void initialize(String vlcApp, String transcodeCommand, boolean logProcessOutput)
+	public static void initialize(String vlcApp, HashMap<VideoCodec, String> transcodeCommands, boolean logProcessOutput)
 	{
 		fVLCApp = vlcApp;
-		fTranscodeCommand = transcodeCommand;
+		fTranscodeCommands = transcodeCommands;
 		fLogProcessOutput = logProcessOutput;
 	}
 
 	/* Implementation */
-	public static long transcodeMedia(File inputFile, File outputFile) throws Exception
+	public static long transcodeMedia(File inputFile, VideoCodec outputVideoCodec, File outputFile) throws Exception
 	{
-		String commandArgs = String.format(fTranscodeCommand, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+		String transcodeCommand = fTranscodeCommands.get(outputVideoCodec);
+		if(!StrUtil.hasLen(transcodeCommand))
+			throw new Exception(String.format("Don't have transcodeCommand for outputVideoCodec(%s)",
+				VideoCodec.convertToString(outputVideoCodec)));
+
+		String commandArgs = String.format(transcodeCommand, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
 		String fullCommand = String.format("\"%s\" %s", fVLCApp, commandArgs);
 
 		Logger.logInfo(VCLManager.class, "transcodeMedia", fullCommand);

@@ -52,10 +52,10 @@ public class ContentItem extends DatabaseObject
 	public ContentItemStatus getStatus() { return fStatus; }
 	public void setStatus(ContentItemStatus status)
 	{
-		if(ContentItemStatus.ToTranscode.equals(status) && (fVideoCodec == null))
-			throw new IllegalArgumentException("Can't set to ToTranscode when fVideoCodec == null");
-		if(ContentItemStatus.ToDownload.equals(status) && (fVideoCodec != null))
-			throw new IllegalArgumentException("Can't set to ToDownload when fVideoCodec != null");
+		if(ContentItemStatus.ToTranscode.equals(status) && (fNeedVideoCodec == null))
+			throw new IllegalArgumentException("Can't set to ToTranscode when fNeedVideoCodec == null");
+		if(ContentItemStatus.ToDownload.equals(status) && (fNeedVideoCodec != null))
+			throw new IllegalArgumentException("Can't set to ToDownload when fNeedVideoCodec != null");
 		fStatus = status;
 	}
 

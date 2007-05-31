@@ -8,9 +8,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.HashMap;
 
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StreamUtil;
+import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
@@ -79,7 +81,15 @@ public class MainApp
 		fContentDir = new File(properties.getProperty("contentDir"));
 		fMaxLocalStorage = Long.parseLong(properties.getProperty("maxLocalStorageGigs")) * BYTES_PER_GIGABYTE;
 
-		VCLManager.initialize(properties.getProperty("vlcapp"), properties.getProperty("transcodecommand"),
+		HashMap<VideoCodec, String> transcodeCommands = new HashMap<VideoCodec, String>();
+		for(VideoCodec videoCodec : VideoCodec.values())
+		{
+			String transcodecommand = properties.getProperty(String.format("transcodecommand_%s", videoCodec.toString()));
+			if(StrUtil.hasLen(transcodecommand))
+				transcodeCommands.put(videoCodec, transcodecommand);
+		}
+
+		VCLManager.initialize(properties.getProperty("vlcapp"), transcodeCommands,
 			Boolean.parseBoolean(properties.getProperty("vlcapp_logoutput")));
 	}
 
@@ -174,7 +184,7 @@ public class MainApp
 		{
 			ContentItem sourceContentItem = ContentItem.getCreate(sourceURL, null);
 			if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus()))
-				contentItem.setStatus(ContentItemStatus.ToDownload);
+				sourceContentItem.setStatus(ContentItemStatus.ToDownload);
 			sourceContentItem.setRequestedAt();
 			sourceContentItem.update();
 
@@ -267,12 +277,13 @@ public class MainApp
 
 	private void transcodeContent(ContentItem srcContentItem, ContentItem dstContentItem) throws Exception
 	{
-		dstContentItem.setFileSize(transcodeFile(srcContentItem.getLocalFilePath(), dstContentItem.getLocalFilePath()));
+		dstContentItem.setFileSize(transcodeFile(srcContentItem.getLocalFilePath(), dstContentItem.getNeedVideoCodec(),
+			dstContentItem.getLocalFilePath()));
 		dstContentItem.setStatus(ContentItemStatus.Local);
 		dstContentItem.update();
 	}
 
-	private long transcodeFile(String srcFileName, String dstFileName) throws Exception
+	private long transcodeFile(String srcFileName, VideoCodec dstVideoCodec, String dstFileName) throws Exception
 	{
 		File srcFile = new File(fContentDir, srcFileName);
 		File dstFile = new File(fContentDir, dstFileName);
@@ -284,7 +295,7 @@ public class MainApp
 		Logger.logInfo(this, "transcodeFile", String.format("Transcoding '%s' to '%s'", srcFile.getAbsolutePath(),
 			dstFile.getAbsolutePath()));
 
-		return VCLManager.transcodeMedia(srcFile, dstFile);
+		return VCLManager.transcodeMedia(srcFile, dstVideoCodec, dstFile);
 	}
 
 	private void checkAndFreeLocalSpace() throws Exception
