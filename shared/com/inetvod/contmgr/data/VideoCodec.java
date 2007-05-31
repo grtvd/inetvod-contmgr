@@ -11,7 +11,9 @@ import com.inetvod.common.core.FileExtension;
 public enum VideoCodec
 {
 	/* Constants */
-	WMV2("WMV2", FileExtension.wmv);
+	WMV1("WMV1", FileExtension.wmv),
+	WMV2("WMV2", FileExtension.wmv),
+	WMV3("WMV3", FileExtension.wmv);
 
 	/* Fields */
 	private final String fValue;

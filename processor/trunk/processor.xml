@@ -5,7 +5,7 @@
 	<entry key="log4j">log4j.xml</entry>
 	<entry key="logdir">/program files/inetvod/logs/contmgr/processor</entry>
 	<entry key="contentDir">/program files/inetvod/contmgr/content</entry>
-	<entry key="vlcapp_good">c:\program files\videolan\vlc\vlc.exe</entry>
+	<entry key="maxLocalStorageGigs">1</entry>
 	<entry key="vlcapp">/program files/videolan/vlc/vlc.exe</entry>
 	<entry key="vlcapp_logoutput">false</entry>
 	<entry key="transcodecommand">-I dummy --quiet -vvv "%s" --sout "#transcode{vcodec=WMV2,vb=1024,scale=1,acodec=mp3,ab=192,channels=2}:standard{access=file,mux=asf,dst='%s'}" vlc:quit</entry>

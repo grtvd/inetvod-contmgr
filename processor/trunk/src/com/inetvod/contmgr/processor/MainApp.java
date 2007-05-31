@@ -21,8 +21,12 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 public class MainApp
 {
+	/* Constants */
+	private static final long BYTES_PER_GIGABYTE = 1073741824;
+
 	/* Fields */
 	private static MainApp fMainApp = new MainApp();
+	private long fMaxLocalStorage;
 	private File fContentDir;
 
 	/* Getters and Setters */
@@ -34,16 +38,15 @@ public class MainApp
 	}
 
 	/* Implementation */
-	@SuppressWarnings({"ACCESS_STATIC_VIA_INSTANCE"})
 	public static void main(String[] args)
 	{
 		try
 		{
 			fMainApp.init();
-			if(fMainApp.processArgs(args))
+			if(processArgs(args))
 				fMainApp.doWork();
 			else
-				fMainApp.printUsage();
+				printUsage();
 		}
 		catch(Exception e)
 		{
@@ -74,6 +77,7 @@ public class MainApp
 		ContentItem.getDatabaseAdaptor();
 
 		fContentDir = new File(properties.getProperty("contentDir"));
+		fMaxLocalStorage = Long.parseLong(properties.getProperty("maxLocalStorageGigs")) * BYTES_PER_GIGABYTE;
 
 		VCLManager.initialize(properties.getProperty("vlcapp"), properties.getProperty("transcodecommand"),
 			Boolean.parseBoolean(properties.getProperty("vlcapp_logoutput")));
@@ -136,12 +140,24 @@ public class MainApp
 
 	private void doWork() throws Exception
 	{
-		String sourceURL = "http://www.podtrac.com/pts/redirect.mp4?http://media.g4tv.com/videoDB/016/101/video16101/as7085ps3elite_pod.mp4";
-
-		processRequest(sourceURL, VideoCodec.WMV2);
+//		processRequest("http://media.libsyn.com/media/tooncast/27_-_Private_SNAFU_-_Home_Front.m4v", VideoCodec.convertFromString("WMV1"));
+//		processRequest("http://media.libsyn.com/media/tooncast/13_-_Stupidstitious.m4v", VideoCodec.convertFromString(""));
+//
+//	String[] sourceURLs = new String[] {
+//"http://www.podtrac.com/pts/redirect.mp4?http://media.g4tv.com/videoDB/016/101/video16101/as7085ps3elite_pod.mp4",
+//"http://media.libsyn.com/media/tooncast/10_-_Caught.m4v",
+//"http://media.libsyn.com/media/tooncast/35_-_Superman_-_Secret_Agent.m4v",
+//"http://media.libsyn.com/media/tooncast/27_-_Private_SNAFU_-_Home_Front.m4v",
+//"http://media.libsyn.com/media/tooncast/45_-_Peg_Leg_Pedro.m4v",
+//"http://media.libsyn.com/media/tooncast/09_-_Felix.m4v"
+//		};
+//
+//		for(String sourceURL : sourceURLs)
+//			processRequest(sourceURL, VideoCodec.WMV2);
 
 		while(processNextItem())
 		{
+			checkAndFreeLocalSpace();
 		}
 	}
 
@@ -159,12 +175,14 @@ public class MainApp
 			ContentItem sourceContentItem = ContentItem.getCreate(sourceURL, null);
 			if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus()))
 				contentItem.setStatus(ContentItemStatus.ToDownload);
+			sourceContentItem.setRequestedAt();
 			sourceContentItem.update();
 
 			if(ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
 				contentItem.setStatus(ContentItemStatus.ToTranscode);
 		}
 
+		contentItem.setRequestedAt();
 		contentItem.update();
 	}
 
@@ -172,27 +190,27 @@ public class MainApp
 	{
 		ContentItem contentItem;
 
-		ContentItemList contentItemList = ContentItemList.findByStatusToTranscode();
+		ContentItemList contentItemList = ContentItemList.findByStatusToDownloadOrTranscode();
 		if(contentItemList.size() != 0)
 		{
 			contentItem = contentItemList.get(0);
-			ContentItem sourceContentItem = ContentItem.getCreate(contentItem.getSourceURL());
-			if(!ContentItemStatus.Local.equals(sourceContentItem.getStatus()))
+			if(ContentItemStatus.ToDownload.equals(contentItem.getStatus()))
 			{
-				downloadContent(sourceContentItem);
+				downloadContent(contentItemList.get(0));
 			}
 			else
 			{
-				transcodeContent(sourceContentItem, contentItem);
+				ContentItem sourceContentItem = ContentItem.getCreate(contentItem.getSourceURL());
+				if(!ContentItemStatus.Local.equals(sourceContentItem.getStatus()))
+				{
+					downloadContent(sourceContentItem);
+				}
+				else
+				{
+					transcodeContent(sourceContentItem, contentItem);
+				}
 			}
 
-			return true;
-		}
-
-		contentItemList = ContentItemList.findByStatusToDownload();
-		if(contentItemList.size() != 0)
-		{
-			downloadContent(contentItemList.get(0));
 			return true;
 		}
 
@@ -214,6 +232,8 @@ public class MainApp
 			file.getParentFile().mkdirs();
 			if(file.exists())
 				file.delete();
+
+			Logger.logInfo(this, "downloadFile", String.format("Downloading '%s' to '%s'", sourceURL, file.getAbsolutePath()));
 
 			// Send HTTP request to server
 			HttpClient httpClient = new HttpClient();
@@ -261,6 +281,51 @@ public class MainApp
 		if(dstFile.exists())
 			dstFile.delete();
 
+		Logger.logInfo(this, "transcodeFile", String.format("Transcoding '%s' to '%s'", srcFile.getAbsolutePath(),
+			dstFile.getAbsolutePath()));
+
 		return VCLManager.transcodeMedia(srcFile, dstFile);
+	}
+
+	private void checkAndFreeLocalSpace() throws Exception
+	{
+		long totalFileSize = ContentItemList.countTotalFileSizeForLocal();
+
+		if(totalFileSize > fMaxLocalStorage)
+			totalFileSize = deleteContentForListUntilMaxLocalStorage(ContentItemList.findBySoloLocal(), totalFileSize);
+
+		if(totalFileSize > fMaxLocalStorage)
+			totalFileSize = deleteContentForListUntilMaxLocalStorage(ContentItemList.findBySoloLocalNoToTranscode(),
+				totalFileSize);
+
+		if(totalFileSize > fMaxLocalStorage)
+			totalFileSize = deleteContentForListUntilMaxLocalStorage(ContentItemList.findByLocalWasTranscoded(),
+				totalFileSize);
+
+		if(totalFileSize > fMaxLocalStorage)
+			Logger.logWarn(this, "checkAndFreeLocalSpace", String.format("TotalFileSize(%d) still greater than MaxLocalStorage(%d)",
+				totalFileSize, fMaxLocalStorage));
+	}
+
+	private long deleteContentForListUntilMaxLocalStorage(ContentItemList contentItemList, long totalFileSize)
+		throws Exception
+	{
+		for(ContentItem contentItem : contentItemList)
+		{
+			if(totalFileSize <= fMaxLocalStorage)
+				break;
+
+			contentItem.setStatus(ContentItemStatus.NotLocal);
+			contentItem.update();
+
+			File file = new File(fContentDir, contentItem.getLocalFilePath());
+			if(!file.delete())
+				Logger.logErr(this, "deleteContentForListUntilMaxLocalStorage", String.format(
+					"Failed to delete file '%s'", file.getAbsolutePath()));
+
+			totalFileSize -= contentItem.getFileSize();
+		}
+
+		return totalFileSize;
 	}
 }

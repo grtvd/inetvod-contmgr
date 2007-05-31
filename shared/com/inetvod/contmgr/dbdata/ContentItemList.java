@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.dbdata.DatabaseProcParam;
-import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
 
 public class ContentItemList extends ArrayList<ContentItem>
@@ -28,25 +27,41 @@ public class ContentItemList extends ArrayList<ContentItem>
 		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetBySourceURLNeedVideoCodec", params);
 	}
 
-	public static ContentItemList findByOldestStatus(ContentItemStatus contentItemStatus) throws Exception
+	public static ContentItemList findByStatusToDownloadOrTranscode() throws Exception
 	{
-		if(contentItemStatus == null)
-			throw new IllegalArgumentException("contentItemStatus cannot be null");
-
-		DatabaseProcParam params[] = new DatabaseProcParam[1];
-
-		params[0] = new DatabaseProcParam(Types.VARCHAR, ContentItemStatus.convertToString(contentItemStatus));
-
-		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByOldestStatus", params);
+		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByOldestStatusToDownloadOrTranscode", null);
 	}
 
-	public static ContentItemList findByStatusToTranscode() throws Exception
+	public static long countTotalFileSizeForLocal() throws Exception
 	{
-		return findByOldestStatus(ContentItemStatus.ToTranscode);
+		Object totalFileSize = ContentItem.getDatabaseAdaptor().executeProcWithReturn("ContentItemList_CountTotalFileSizeForLocal", null);
+		if(totalFileSize instanceof Long)
+			return (Long)totalFileSize;
+		throw new Exception("Bad return value");
 	}
 
-	public static ContentItemList findByStatusToDownload() throws Exception
+	/**
+	 * Find Local items that don't have any related items (no others with same SourceURL).
+	 */
+	public static ContentItemList findBySoloLocal() throws Exception
 	{
-		return findByOldestStatus(ContentItemStatus.ToDownload);
+		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetBySoloLocal", null);
+	}
+
+	/**
+	 * Find Local items that don't have any related items (no others with same SourceURL) or no related items that
+	 * need transcoding.
+	 */
+	public static ContentItemList findBySoloLocalNoToTranscode() throws Exception
+	{
+		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetBySoloLocalNoToTranscode", null);
+	}
+
+	/**
+	 * Find Local items that were previously transcoded.
+	 */
+	public static ContentItemList findByLocalWasTranscoded() throws Exception
+	{
+		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByLocalWasTranscoded", null);
 	}
 }

@@ -47,7 +47,7 @@ public class ContentItem extends DatabaseObject
 	public VideoCodec getNeedVideoCodec() { return fNeedVideoCodec; }
 
 	public Date getRequestedAt() { return fRequestedAt; }
-	public void setRequestedAt(Date requestedAt) { fRequestedAt = requestedAt; }
+	public void setRequestedAt() { fRequestedAt = new Date(); }
 
 	public ContentItemStatus getStatus() { return fStatus; }
 	public void setStatus(ContentItemStatus status)

@@ -24,8 +24,24 @@ if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentIte
 drop procedure [dbo].[ContentItemList_GetBySourceURLNeedVideoCodec]
 GO
 
-if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByOldestStatus]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
-drop procedure [dbo].[ContentItemList_GetByOldestStatus]
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByOldestStatusToDownloadOrTranscode]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_GetByOldestStatusToDownloadOrTranscode]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_CountTotalFileSizeForLocal]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_CountTotalFileSizeForLocal]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetBySoloLocal]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_GetBySoloLocal]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetBySoloLocalNoToTranscode]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_GetBySoloLocalNoToTranscode]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByLocalWasTranscoded]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_GetByLocalWasTranscoded]
 GO
 
 --//////////////////////////////////////////////////////////////////////////////
@@ -127,13 +143,63 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
-CREATE PROCEDURE dbo.ContentItemList_GetByOldestStatus
-	@Status varchar(16)
+CREATE PROCEDURE dbo.ContentItemList_GetByOldestStatusToDownloadOrTranscode
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
 		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
 	from ContentItem
-	where Status = @Status
+	where (Status = 'ToDownload') or (Status = 'ToTranscode')
+	order by RequestedAt
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
+CREATE PROCEDURE dbo.ContentItemList_CountTotalFileSizeForLocal
+AS
+	select "TotalFileSize" = sum(FileSize) from ContentItem where (Status = 'Local')
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
+-- Find Local items that don't have any related items (no others with same SourceURL)
+
+CREATE PROCEDURE dbo.ContentItemList_GetBySoloLocal
+AS
+	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
+		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+	from ContentItem
+	where (Status = 'Local') and (NeedVideoCodec is null)
+	and (SourceURL not in (select distinct SourceURL from ContentItem
+		where (NeedVideoCodec is not null)))
+	order by RequestedAt
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
+-- Find Local items that don't have any related items (no others with same SourceURL)
+-- or no related items that need transcoding
+
+CREATE PROCEDURE dbo.ContentItemList_GetBySoloLocalNoToTranscode
+AS
+	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
+		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+	from ContentItem
+	where (Status = 'Local') and (NeedVideoCodec is null)
+	and (SourceURL not in (select distinct SourceURL from ContentItem
+		where (NeedVideoCodec is not null) and (Status = 'ToTranscode')))
+	order by RequestedAt
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
+-- Find Local items that were previously transcoded
+
+CREATE PROCEDURE dbo.ContentItemList_GetByLocalWasTranscoded
+AS
+	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
+		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+	from ContentItem
+	where (Status = 'Local') and (NeedVideoCodec is not null)
 	order by RequestedAt
 GO
 
@@ -143,7 +209,11 @@ GRANT EXECUTE ON [dbo].[ContentItem_Insert] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_Update] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_GetAll] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySourceURLNeedVideoCodec] TO [contmgr]
-GRANT EXECUTE ON [dbo].[ContentItemList_GetByOldestStatus] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_GetByOldestStatusToDownloadOrTranscode] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_CountTotalFileSizeForLocal] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_GetBySoloLocal] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_GetBySoloLocalNoToTranscode] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_GetByLocalWasTranscoded] TO [contmgr]
 
 --//////////////////////////////////////////////////////////////////////////////
 

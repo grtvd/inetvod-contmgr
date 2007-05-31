@@ -103,14 +103,17 @@ CREATE TABLE [dbo].[ContentItem] (
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[ContentItem] WITH NOCHECK ADD 
-	CONSTRAINT [PK_ContentItem] PRIMARY KEY  CLUSTERED 
+ALTER TABLE [dbo].[ContentItem] WITH NOCHECK ADD
+	CONSTRAINT [PK_ContentItem] PRIMARY KEY  CLUSTERED
 	(
 		[ContentItemID]
-	)  ON [PRIMARY] 
+	)  ON [PRIMARY]
 GO
 
  CREATE  UNIQUE  INDEX [IX_ContentItem_SourceURL] ON [dbo].[ContentItem]([SourceURL], [NeedVideoCodec]) ON [PRIMARY]
+GO
+
+ CREATE  INDEX [IX_ContentItem_NeedVideoCodec] ON [dbo].[ContentItem]([NeedVideoCodec]) ON [PRIMARY]
 GO
 
 CREATE NONCLUSTERED INDEX [IX_ContentItem_StatusRequestedAt] ON [dbo].[ContentItem]
