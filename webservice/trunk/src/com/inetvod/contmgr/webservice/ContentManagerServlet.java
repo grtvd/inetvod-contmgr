@@ -16,8 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
+import com.inetvod.common.core.XmlDataWriter;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
+import com.inetvod.contmgr.data.Info;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
 
@@ -66,7 +68,7 @@ public class ContentManagerServlet extends HttpServlet
 		{
 			String function = httpServletRequest.getPathInfo();
 			if(!StrUtil.hasLen(function) ||
-				(!GET_CONTENT_FUNC.equals(function) && !GET_CONTENT_STATS_FUNC.equals(function)))
+				(!GET_CONTENT_STATS_FUNC.equals(function) && !GET_CONTENT_FUNC.equals(function)))
 			{
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
@@ -90,18 +92,15 @@ public class ContentManagerServlet extends HttpServlet
 				return;
 			}
 
-
-			ContentItem contentItem = getContentItem(sourceURL, needVideoCodec);
-
-			if(GET_CONTENT_FUNC.equals(function))
+			if(GET_CONTENT_STATS_FUNC.equals(function))
 			{
-				fullfillGetContentRequest(httpServletResponse, contentItem);
+				ContentItem contentItem = getContentItem(sourceURL, needVideoCodec, true);
+				fulfillGetContentStatsRequest(httpServletResponse, contentItem);
 			}
-			else if(GET_CONTENT_STATS_FUNC.equals(function))
+			else if(GET_CONTENT_FUNC.equals(function))
 			{
-				//TODO return the file stats
-				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				//TODO return;
+				ContentItem contentItem = getContentItem(sourceURL, needVideoCodec, false);
+				fulfillGetContentRequest(httpServletResponse, contentItem);
 			}
 		}
 		catch(Exception e)
@@ -111,39 +110,69 @@ public class ContentManagerServlet extends HttpServlet
 		}
 	}
 
-	private static ContentItem getContentItem(String sourceURL, VideoCodec needVideoCodec) throws Exception
+	private static ContentItem getContentItem(String sourceURL, VideoCodec needVideoCodec, boolean statsOnly) throws Exception
 	{
 		ContentItem contentItem = ContentItem.getCreate(sourceURL, needVideoCodec);
 
-		if(contentItem.getNeedVideoCodec() == null)
+		if(!statsOnly && ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
 		{
-			if(ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
-				contentItem.setStatus(ContentItemStatus.ToDownload);
-		}
-		else
-		{
-			ContentItem sourceContentItem = ContentItem.getCreate(sourceURL, null);
-			if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus()))
-				sourceContentItem.setStatus(ContentItemStatus.ToDownload);
-			sourceContentItem.setRequestedAt();
-			sourceContentItem.update();
-
-			if(ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
-				contentItem.setStatus(ContentItemStatus.ToTranscode);
+			contentItem.setStatus((contentItem.getNeedVideoCodec() == null) ? ContentItemStatus.ToDownload
+				: ContentItemStatus.ToTranscode);
+			contentItem.setRequestedAt();
 		}
 
-		contentItem.setRequestedAt();
+		if(ContentItemStatus.Local.equals(contentItem.getStatus()))
+			contentItem.setRequestedAt();		// move it newer to won't get purged
+
+		if(contentItem.getNeedVideoCodec() != null)
+		{
+			// is source needed?
+			if(!statsOnly && ContentItemStatus.ToTranscode.equals(contentItem.getStatus()))
+			{
+				ContentItem sourceContentItem = ContentItem.getCreate(sourceURL, null);
+
+				if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus()))
+				{
+					sourceContentItem.setStatus(ContentItemStatus.ToDownload);
+					sourceContentItem.setRequestedAt();
+				}
+
+				if(ContentItemStatus.Local.equals(contentItem.getStatus()))
+					contentItem.setRequestedAt();		// move it newer to won't get purged
+
+				sourceContentItem.update();
+			}
+		}
+
 		contentItem.update();
 
 		return contentItem;
 	}
 
-	private void fullfillGetContentRequest(HttpServletResponse httpServletResponse, ContentItem contentItem)
+	private static void fulfillGetContentStatsRequest(HttpServletResponse httpServletResponse, ContentItem contentItem)
+		throws Exception
+	{
+		if(!ContentItemStatus.Local.equals(contentItem.getStatus())
+			&& !ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
+		{
+			httpServletResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		Info info = new Info();
+		info.setFileSize(contentItem.getFileSize());
+
+		XmlDataWriter xmlDataWriter = new XmlDataWriter(httpServletResponse.getOutputStream());
+		xmlDataWriter.writeObject("info", info);
+		xmlDataWriter.flush();
+	}
+
+	private void fulfillGetContentRequest(HttpServletResponse httpServletResponse, ContentItem contentItem)
 		throws Exception
 	{
 		if(!ContentItemStatus.Local.equals(contentItem.getStatus()))
 		{
-			httpServletResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+			httpServletResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
