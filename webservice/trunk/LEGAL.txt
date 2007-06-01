@@ -1,0 +1,33 @@
+****************LEGAL NOTICE OF INETVOD, INC. EXLUSIVE OWNERSHIP****************
+
+The source files contained herein, together with any file supplements and
+documentation, in any format used (collectively, the "Source Code"), are the
+sole and exclusive property of iNetVOD, Inc., ("iNetVOD").  iNetVOD reserves all
+rights, title and interest in and to the Source Code.  The Source Code contains
+confidential information and trade secrets that are legally privileged and
+intended solely for use by iNetVOD or its duly authorized representatives.
+Access to and use of the Source Code by outside contractors, licensees or any
+other third parties (together "Users") pursuant to and expressly authorized
+under a separate agreement is not a grant of title, license or any rights of
+ownership to the Source Code.  iNetVOD shall remain the sole and exclusive owner
+of any changes, modifications, enhancements and derivative works to the Source
+Code.
+
+Users shall not duplicate, modify (including creating derivative works),
+reverse-engineer, decompile, disassemble, distribute, transfer (by any means),
+display, license, or rent the Source Code for any purpose and shall not remove,
+overprint or deface any legal notices or other notices of intellectual property
+ownership from any originals or copies of the Source Code.
+
+The confidential information and trade secrets contained in the Source Code
+provide iNetVOD with a substantial competitive advantage.  The disclosure of
+this information to any other company or individual, either intentionally or
+negligently, would irreparably harm the legitimate business and commercial
+interests of iNetVOD.  iNetVOD reserves all right to pursue any legal or
+equitable remedies against any potential or actual infringers of iNetVOD's
+intellectual property ownership interests in and to the Source Code or any other
+intellectual property rights to the full extent permitted by law.
+
+The Source Code is copyrighted material.
+Copyright © 2004-2006 iNetVOD, Inc.  ALL RIGHTS RESERVED.
+********************************************************************************

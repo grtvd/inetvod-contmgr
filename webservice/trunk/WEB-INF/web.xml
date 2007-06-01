@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+	<context-param>
+		<param-name>dbconnect</param-name>
+		<param-value>/program files/inetvod/contmgr/dbconnect.xml</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>logdir</param-name>
+		<param-value>/program files/inetvod/logs/contmgr/webservice</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>contentDir</param-name>
+		<param-value>/program files/inetvod/contmgr/content</param-value>
+	</context-param>
+
+	<servlet>
+		<servlet-name>ContentManagerServlet</servlet-name>
+		<servlet-class>com.inetvod.contmgr.webservice.ContentManagerServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ContentManagerServlet</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>
