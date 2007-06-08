@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
-import com.inetvod.common.core.XmlDataWriter;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.Info;
@@ -162,9 +161,7 @@ public class ContentManagerServlet extends HttpServlet
 		Info info = new Info();
 		info.setFileSize(contentItem.getFileSize());
 
-		XmlDataWriter xmlDataWriter = new XmlDataWriter(httpServletResponse.getOutputStream());
-		xmlDataWriter.writeObject("info", info);
-		xmlDataWriter.flush();
+		info.writeToStream(httpServletResponse.getOutputStream());
 	}
 
 	private void fulfillGetContentRequest(HttpServletResponse httpServletResponse, ContentItem contentItem)

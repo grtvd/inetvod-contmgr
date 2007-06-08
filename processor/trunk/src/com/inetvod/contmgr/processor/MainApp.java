@@ -7,18 +7,19 @@ package com.inetvod.contmgr.processor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Properties;
 import java.util.HashMap;
+import java.util.Properties;
 
 import com.inetvod.common.core.Logger;
-import com.inetvod.common.core.StreamUtil;
 import com.inetvod.common.core.StrUtil;
+import com.inetvod.common.core.StreamUtil;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
 import com.inetvod.contmgr.dbdata.ContentItemList;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 public class MainApp
@@ -30,9 +31,6 @@ public class MainApp
 	private static MainApp fMainApp = new MainApp();
 	private long fMaxLocalStorage;
 	private File fContentDir;
-
-	/* Getters and Setters */
-	public static MainApp getThe() { return fMainApp; }
 
 	/* Construction */
 	private MainApp()
@@ -102,37 +100,6 @@ public class MainApp
 				return true;
 
 			return false;
-
-//			if(args.length != 2)
-//				return false;
-//
-//			for(int i = 0; i < args.length; i++)
-//			{
-//				if("-p".equals(args[i]))
-//				{
-//					if(i < args.length - 1)
-//					{
-//						i++;
-//						fProviderID = new ProviderID(args[i]);
-//					}
-//					else
-//						return false;
-//				}
-//				else if("-pc".equals(args[i]))
-//				{
-//					if(i < args.length - 1)
-//					{
-//						i++;
-//						fProviderConnectionID = new ProviderConnectionID(args[i]);
-//					}
-//					else
-//						return false;
-//				}
-//				else
-//					return false;
-//			}
-
-//			return true;
 		}
 		catch(Exception e)
 		{
@@ -143,57 +110,14 @@ public class MainApp
 	private static void printUsage()
 	{
 		System.out.println("usage: process");
-//		System.out.println("usage: process [options] [args]");
-//		System.out.println("   -p <ProviderID>");
-//		System.out.println("   -pc <ProviderConnectionID>");
 	}
 
 	private void doWork() throws Exception
 	{
-//		processRequest("http://media.libsyn.com/media/tooncast/27_-_Private_SNAFU_-_Home_Front.m4v", VideoCodec.convertFromString("WMV1"));
-//		processRequest("http://media.libsyn.com/media/tooncast/13_-_Stupidstitious.m4v", VideoCodec.convertFromString(""));
-//
-//	String[] sourceURLs = new String[] {
-//"http://www.podtrac.com/pts/redirect.mp4?http://media.g4tv.com/videoDB/016/101/video16101/as7085ps3elite_pod.mp4",
-//"http://media.libsyn.com/media/tooncast/10_-_Caught.m4v",
-//"http://media.libsyn.com/media/tooncast/35_-_Superman_-_Secret_Agent.m4v",
-//"http://media.libsyn.com/media/tooncast/27_-_Private_SNAFU_-_Home_Front.m4v",
-//"http://media.libsyn.com/media/tooncast/45_-_Peg_Leg_Pedro.m4v",
-//"http://media.libsyn.com/media/tooncast/09_-_Felix.m4v"
-//		};
-//
-//		for(String sourceURL : sourceURLs)
-//			processRequest(sourceURL, VideoCodec.WMV2);
-
 		while(processNextItem())
 		{
 			checkAndFreeLocalSpace();
 		}
-	}
-
-	private static void processRequest(String sourceURL, VideoCodec needVideoCodec) throws Exception
-	{
-		ContentItem contentItem = ContentItem.getCreate(sourceURL, needVideoCodec);
-
-		if(contentItem.getNeedVideoCodec() == null)
-		{
-			if(ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
-				contentItem.setStatus(ContentItemStatus.ToDownload);
-		}
-		else
-		{
-			ContentItem sourceContentItem = ContentItem.getCreate(sourceURL, null);
-			if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus()))
-				sourceContentItem.setStatus(ContentItemStatus.ToDownload);
-			sourceContentItem.setRequestedAt();
-			sourceContentItem.update();
-
-			if(ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
-				contentItem.setStatus(ContentItemStatus.ToTranscode);
-		}
-
-		contentItem.setRequestedAt();
-		contentItem.update();
 	}
 
 	private boolean processNextItem() throws Exception
@@ -229,9 +153,19 @@ public class MainApp
 
 	private void downloadContent(ContentItem contentItem) throws Exception
 	{
-		contentItem.setFileSize(downloadFile(contentItem.getSourceURL(), contentItem.getLocalFilePath()));
-		contentItem.setStatus(ContentItemStatus.Local);
-		contentItem.update();
+		long fileSize = downloadFile(contentItem.getSourceURL(), contentItem.getLocalFilePath());
+		if(fileSize > 0)
+		{
+			contentItem.setFileSize(fileSize);
+			contentItem.setStatus(ContentItemStatus.Local);
+			contentItem.update();
+		}
+		//TODO for now a temporary fix, settting the RequestedAt date will move to bottom of queue, giving time to other itmes to be serviced
+		else
+		{
+			contentItem.setRequestedAt();
+			contentItem.update();
+		}
 	}
 
 	private long downloadFile(String sourceURL, String fileName) throws Exception
@@ -239,9 +173,6 @@ public class MainApp
 		try
 		{
 			File file = new File(fContentDir, fileName);
-			file.getParentFile().mkdirs();
-			if(file.exists())
-				file.delete();
 
 			Logger.logInfo(this, "downloadFile", String.format("Downloading '%s' to '%s'", sourceURL, file.getAbsolutePath()));
 
@@ -253,14 +184,22 @@ public class MainApp
 
 			try
 			{
-				httpClient.executeMethod(getMethod);
-				InputStream responseStream = getMethod.getResponseBodyAsStream();
+				int rc = httpClient.executeMethod(getMethod);
+				if(rc != HttpStatus.SC_OK)
+				{
+					Logger.logWarn(this, "downloadFile", String.format("Bad result(%d) from url(%s)", rc, sourceURL));
+					return 0;
+				}
 
+				file.getParentFile().mkdirs();
+				if(file.exists())
+					file.delete();
+
+				InputStream responseStream = getMethod.getResponseBodyAsStream();
 				StreamUtil.streamToFile(responseStream, file.getAbsolutePath());
 
-				long fileLen = file.length();
-				if(fileLen == 0)
-					throw new Exception(String.format("File(%s) is 0 length", file.getAbsolutePath()));
+				if(!file.exists() || (file.length() == 0))
+					Logger.logWarn(this, "", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
 				return file.length();
 			}
 			finally
@@ -270,8 +209,8 @@ public class MainApp
 		}
 		catch(Exception e)
 		{
-			Logger.logErr(this, "downloadFile", e);
-			throw e;
+			Logger.logWarn(this, "downloadFile", e);
+			return 0;
 		}
 	}
 
@@ -333,6 +272,8 @@ public class MainApp
 			if(!file.delete())
 				Logger.logErr(this, "deleteContentForListUntilMaxLocalStorage", String.format(
 					"Failed to delete file '%s'", file.getAbsolutePath()));
+			if(file.getParentFile().listFiles().length == 0)
+				file.getParentFile().delete();
 
 			totalFileSize -= contentItem.getFileSize();
 		}

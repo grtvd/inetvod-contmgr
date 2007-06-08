@@ -8,16 +8,16 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContMgr_ValidationQuery]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContMgr_ValidationQuery]
+GO
+
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItem_Insert]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
 drop procedure [dbo].[ContentItem_Insert]
 GO
 
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItem_Update]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
 drop procedure [dbo].[ContentItem_Update]
-GO
-
-if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItem_GetAll]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
-drop procedure [dbo].[ContentItem_GetAll]
 GO
 
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetBySourceURLNeedVideoCodec]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
@@ -49,6 +49,13 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS OFF
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
+CREATE PROCEDURE dbo.ContMgr_ValidationQuery
+AS
+	select count(*) from ContentItem
 GO
 
 --//////////////////////////////////////////////////////////////////////////////
@@ -122,15 +129,6 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
-CREATE PROCEDURE dbo.ContentItem_GetAll
-AS
-	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
-	from ContentItem
-GO
-
---//////////////////////////////////////////////////////////////////////////////
-
 CREATE PROCEDURE dbo.ContentItemList_GetBySourceURLNeedVideoCodec
 	@SourceURL varchar(892),
 	@NeedVideoCodec varchar(8)
@@ -156,7 +154,7 @@ GO
 
 CREATE PROCEDURE dbo.ContentItemList_CountTotalFileSizeForLocal
 AS
-	select "TotalFileSize" = sum(FileSize) from ContentItem where (Status = 'Local')
+	select "TotalFileSize" = isnull(sum(FileSize),0) from ContentItem where (Status = 'Local')
 GO
 
 --//////////////////////////////////////////////////////////////////////////////
@@ -205,9 +203,9 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
+GRANT EXECUTE ON [dbo].[ContMgr_ValidationQuery] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_Insert] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_Update] TO [contmgr]
-GRANT EXECUTE ON [dbo].[ContentItem_GetAll] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySourceURLNeedVideoCodec] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetByOldestStatusToDownloadOrTranscode] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_CountTotalFileSizeForLocal] TO [contmgr]
