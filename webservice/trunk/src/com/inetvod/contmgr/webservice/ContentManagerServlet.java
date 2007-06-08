@@ -113,7 +113,8 @@ public class ContentManagerServlet extends HttpServlet
 	{
 		ContentItem contentItem = ContentItem.getCreate(sourceURL, needVideoCodec);
 
-		if(!statsOnly && ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
+		if((!statsOnly && ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
+			|| ContentItemStatus.Error.equals(contentItem.getStatus()))
 		{
 			contentItem.setStatus((contentItem.getNeedVideoCodec() == null) ? ContentItemStatus.ToDownload
 				: ContentItemStatus.ToTranscode);
@@ -126,11 +127,12 @@ public class ContentManagerServlet extends HttpServlet
 		if(contentItem.getNeedVideoCodec() != null)
 		{
 			// is source needed?
-			if(!statsOnly && ContentItemStatus.ToTranscode.equals(contentItem.getStatus()))
+			if(ContentItemStatus.ToTranscode.equals(contentItem.getStatus()))
 			{
 				ContentItem sourceContentItem = ContentItem.getCreate(sourceURL, null);
 
-				if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus()))
+				if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus())
+					|| ContentItemStatus.Error.equals(sourceContentItem.getStatus()))
 				{
 					sourceContentItem.setStatus(ContentItemStatus.ToDownload);
 					sourceContentItem.setRequestedAt();

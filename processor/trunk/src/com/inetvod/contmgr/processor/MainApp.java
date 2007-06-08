@@ -26,11 +26,14 @@ public class MainApp
 {
 	/* Constants */
 	private static final long BYTES_PER_GIGABYTE = 1073741824;
+	private static final int MILLIS_PER_SECOND = 1000;
 
 	/* Fields */
 	private static MainApp fMainApp = new MainApp();
-	private long fMaxLocalStorage;
 	private File fContentDir;
+	private long fMaxLocalStorage;
+	private short fRetryCount;
+	private int fDownloadTimeoutSecs;
 
 	/* Construction */
 	private MainApp()
@@ -78,6 +81,8 @@ public class MainApp
 
 		fContentDir = new File(properties.getProperty("contentDir"));
 		fMaxLocalStorage = Long.parseLong(properties.getProperty("maxLocalStorageGigs")) * BYTES_PER_GIGABYTE;
+		fRetryCount = Short.parseShort(properties.getProperty("retryCount"));
+		fDownloadTimeoutSecs = Integer.parseInt(properties.getProperty("downloadTimeoutSecs")) * MILLIS_PER_SECOND;
 
 		HashMap<VideoCodec, String> transcodeCommands = new HashMap<VideoCodec, String>();
 		for(VideoCodec videoCodec : VideoCodec.values())
@@ -135,7 +140,12 @@ public class MainApp
 			else
 			{
 				ContentItem sourceContentItem = ContentItem.getCreate(contentItem.getSourceURL());
-				if(!ContentItemStatus.Local.equals(sourceContentItem.getStatus()))
+				if(ContentItemStatus.Error.equals(sourceContentItem.getStatus()))
+				{
+					contentItem.setStatus(ContentItemStatus.Error);
+					contentItem.update();
+				}
+				else if(!ContentItemStatus.Local.equals(sourceContentItem.getStatus()))
 				{
 					downloadContent(sourceContentItem);
 				}
@@ -163,6 +173,9 @@ public class MainApp
 		//TODO for now a temporary fix, settting the RequestedAt date will move to bottom of queue, giving time to other itmes to be serviced
 		else
 		{
+			contentItem.incRetryCount();
+			if(contentItem.getRetryCount() >= fRetryCount)
+				contentItem.setStatus(ContentItemStatus.Error);
 			contentItem.setRequestedAt();
 			contentItem.update();
 		}
@@ -178,7 +191,8 @@ public class MainApp
 
 			// Send HTTP request to server
 			HttpClient httpClient = new HttpClient();
-			//TODO httpClient.getParams().setParameter("http.socket.timeout", TimeoutMillis);
+			if(fDownloadTimeoutSecs > 0)
+				httpClient.getParams().setParameter("http.socket.timeout", fDownloadTimeoutSecs);
 			GetMethod getMethod = new GetMethod(sourceURL);
 			getMethod.setFollowRedirects(true);
 
@@ -199,7 +213,7 @@ public class MainApp
 				StreamUtil.streamToFile(responseStream, file.getAbsolutePath());
 
 				if(!file.exists() || (file.length() == 0))
-					Logger.logWarn(this, "", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
+					Logger.logWarn(this, "downloadFile", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
 				return file.length();
 			}
 			finally
@@ -216,10 +230,23 @@ public class MainApp
 
 	private void transcodeContent(ContentItem srcContentItem, ContentItem dstContentItem) throws Exception
 	{
-		dstContentItem.setFileSize(transcodeFile(srcContentItem.getLocalFilePath(), dstContentItem.getNeedVideoCodec(),
-			dstContentItem.getLocalFilePath()));
-		dstContentItem.setStatus(ContentItemStatus.Local);
-		dstContentItem.update();
+		long fileSize = transcodeFile(srcContentItem.getLocalFilePath(), dstContentItem.getNeedVideoCodec(),
+			dstContentItem.getLocalFilePath());
+		if(fileSize > 0)
+		{
+			dstContentItem.setFileSize(fileSize);
+			dstContentItem.setStatus(ContentItemStatus.Local);
+			dstContentItem.update();
+		}
+		//TODO for now a temporary fix, settting the RequestedAt date will move to bottom of queue, giving time to other itmes to be serviced
+		else
+		{
+			dstContentItem.incRetryCount();
+			if(dstContentItem.getRetryCount() >= fRetryCount)
+				dstContentItem.setStatus(ContentItemStatus.Error);
+			dstContentItem.setRequestedAt();
+			dstContentItem.update();
+		}
 	}
 
 	private long transcodeFile(String srcFileName, VideoCodec dstVideoCodec, String dstFileName) throws Exception

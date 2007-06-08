@@ -31,6 +31,7 @@ public class ContentItem extends DatabaseObject
 	private VideoCodec fNeedVideoCodec;
 	private Date fRequestedAt;
 	private ContentItemStatus fStatus;
+	private short fRetryCount;
 	private String fLocalFilePath;
 	private Long fFileSize;
 	private VideoCodec fVideoCodec;
@@ -57,7 +58,12 @@ public class ContentItem extends DatabaseObject
 		if(ContentItemStatus.ToDownload.equals(status) && (fNeedVideoCodec != null))
 			throw new IllegalArgumentException("Can't set to ToDownload when fNeedVideoCodec != null");
 		fStatus = status;
+		if(!ContentItemStatus.Error.equals(fStatus))
+			fRetryCount = 0;
 	}
+
+	public short getRetryCount() { return fRetryCount; }
+	public void incRetryCount() { fRetryCount++; }
 
 	public String getLocalFilePath() { return fLocalFilePath; }
 	public void setLocalFilePath(String localFilePath) { fLocalFilePath = localFilePath; }
@@ -87,6 +93,7 @@ public class ContentItem extends DatabaseObject
 			fStatus = ContentItemStatus.ToDownload;
 		else
 			fStatus = ContentItemStatus.ToTranscode;
+		fRetryCount = 0;
 
 		String localFileName = fContentItemID.toString();
 		FileExtension fileExtension;
@@ -140,6 +147,7 @@ public class ContentItem extends DatabaseObject
 		fNeedVideoCodec = VideoCodec.convertFromString(reader.readString("NeedVideoCodec", NeedVideoCodecMaxLength));
 		fRequestedAt = reader.readDateTime("RequestedAt");
 		fStatus = ContentItemStatus.convertFromString(reader.readString("Status", ContentItemStatus.MaxLength));
+		fRetryCount = reader.readShort("RetryCount");
 		fLocalFilePath = reader.readString("LocalFilePath", LocalFilePathMaxLength);
 		fFileSize = reader.readLong("FileSize");
 		fVideoCodec = VideoCodec.convertFromString(reader.readString("VideoCodec", VideoCodecMaxLength));
@@ -154,6 +162,7 @@ public class ContentItem extends DatabaseObject
 		writer.writeString("NeedVideoCodec", VideoCodec.convertToString(fNeedVideoCodec), NeedVideoCodecMaxLength);
 		writer.writeDateTime("RequestedAt", fRequestedAt);
 		writer.writeString("Status", ContentItemStatus.convertToString(fStatus), ContentItemStatus.MaxLength);
+		writer.writeShort("RetryCount", fRetryCount);
 		writer.writeString("LocalFilePath", fLocalFilePath, LocalFilePathMaxLength);
 		writer.writeLong("FileSize", fFileSize);
 		writer.writeString("VideoCodec", VideoCodec.convertToString(fVideoCodec), VideoCodecMaxLength);

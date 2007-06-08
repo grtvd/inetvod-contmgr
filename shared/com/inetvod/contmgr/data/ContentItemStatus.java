@@ -11,7 +11,8 @@ public enum ContentItemStatus
 	ToDownload,
 	Local,
 	ToTranscode,
-	NotLocal;
+	NotLocal,
+	Error;
 
 	/* Constants */
 	public static final int MaxLength = 16;

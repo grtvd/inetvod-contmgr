@@ -95,6 +95,7 @@ CREATE TABLE [dbo].[ContentItem] (
 	[NeedVideoCodec] [varchar] (8) NULL ,
 	[RequestedAt] [datetime] NOT NULL ,
 	[Status] [varchar] (16) NOT NULL ,
+	[RetryCount] [smallint] NOT NULL ,
 	[LocalFilePath] [varchar] (64) NULL ,
 	[FileSize] [bigint] NULL ,
 	[VideoCodec] [varchar] (8) NULL ,

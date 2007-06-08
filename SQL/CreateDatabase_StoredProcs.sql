@@ -66,6 +66,7 @@ CREATE PROCEDURE dbo.ContentItem_Insert
 	@NeedVideoCodec varchar(8),
 	@RequestedAt datetime,
 	@Status varchar(16),
+	@RetryCount smallint,
 	@LocalFilePath varchar(64),
 	@FileSize bigint,
 	@VideoCodec varchar(8),
@@ -79,6 +80,7 @@ AS
 		NeedVideoCodec,
 		RequestedAt,
 		Status,
+		RetryCount,
 		LocalFilePath,
 		FileSize,
 		VideoCodec,
@@ -92,6 +94,7 @@ AS
 		@NeedVideoCodec,
 		@RequestedAt,
 		@Status,
+		@RetryCount,
 		@LocalFilePath,
 		@FileSize,
 		@VideoCodec,
@@ -108,6 +111,7 @@ CREATE PROCEDURE dbo.ContentItem_Update
 	@NeedVideoCodec varchar(8),
 	@RequestedAt datetime,
 	@Status varchar(16),
+	@RetryCount smallint,
 	@LocalFilePath varchar(64),
 	@FileSize bigint,
 	@VideoCodec varchar(8),
@@ -119,6 +123,7 @@ AS
 		NeedVideoCodec = @NeedVideoCodec,
 		RequestedAt = @RequestedAt,
 		Status = @Status,
+		RetryCount = @RetryCount,
 		LocalFilePath = @LocalFilePath,
 		FileSize = @FileSize,
 		VideoCodec = @VideoCodec,
@@ -134,7 +139,7 @@ CREATE PROCEDURE dbo.ContentItemList_GetBySourceURLNeedVideoCodec
 	@NeedVideoCodec varchar(8)
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
 	from ContentItem
 	where (SourceURL = @SourceURL) and (NeedVideoCodec = @NeedVideoCodec)
 GO
@@ -144,7 +149,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetByOldestStatusToDownloadOrTranscode
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
 	from ContentItem
 	where (Status = 'ToDownload') or (Status = 'ToTranscode')
 	order by RequestedAt
@@ -164,7 +169,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetBySoloLocal
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
 	from ContentItem
 	where (Status = 'Local') and (NeedVideoCodec is null)
 	and (SourceURL not in (select distinct SourceURL from ContentItem
@@ -180,7 +185,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetBySoloLocalNoToTranscode
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
 	from ContentItem
 	where (Status = 'Local') and (NeedVideoCodec is null)
 	and (SourceURL not in (select distinct SourceURL from ContentItem
@@ -195,7 +200,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetByLocalWasTranscoded
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
+		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec, CanRelease
 	from ContentItem
 	where (Status = 'Local') and (NeedVideoCodec is not null)
 	order by RequestedAt

@@ -32,12 +32,15 @@ public class VCLManager
 	}
 
 	/* Implementation */
-	public static long transcodeMedia(File inputFile, VideoCodec outputVideoCodec, File outputFile) throws Exception
+	public static long transcodeMedia(File inputFile, VideoCodec outputVideoCodec, File outputFile)
 	{
 		String transcodeCommand = fTranscodeCommands.get(outputVideoCodec);
 		if(!StrUtil.hasLen(transcodeCommand))
-			throw new Exception(String.format("Don't have transcodeCommand for outputVideoCodec(%s)",
-				VideoCodec.convertToString(outputVideoCodec)));
+		{
+			Logger.logErr(VCLManager.class, "transcodeMedia", String.format(
+				"Don't have transcodeCommand for outputVideoCodec(%s)", VideoCodec.convertToString(outputVideoCodec)));
+			return 0;
+		}
 
 		String commandArgs = String.format(transcodeCommand, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
 		String fullCommand = String.format("\"%s\" %s", fVLCApp, commandArgs);
@@ -47,9 +50,11 @@ public class VCLManager
 		StreamEaterThread inputEaterThread = null;
 		StreamEaterThread errorEaterThread = null;
 
-		Process process = Runtime.getRuntime().exec(fullCommand, null, inputFile.getParentFile());
+		Process process = null;
 		try
 		{
+			process = Runtime.getRuntime().exec(fullCommand, null, inputFile.getParentFile());
+
 			inputEaterThread = new StreamEaterThread(process.getInputStream(), "vcl_input", fLogProcessOutput);
 			inputEaterThread.start();
 
@@ -58,17 +63,20 @@ public class VCLManager
 
 			int rc = process.waitFor();
 			if(rc != 0)
-				throw new Exception(String.format("process failed, rc(%d)", rc));
+			{
+				Logger.logWarn(VCLManager.class, "transcodeMedia", String.format("process failed, rc(%d)", rc));
+				return 0;
+			}
 
-			long fileLen = outputFile.length();
-			if(fileLen == 0)
-				throw new Exception(String.format("File(%s) is 0 length", outputFile.getAbsolutePath()));
+			if(!outputFile.exists() || (outputFile.length() == 0))
+				Logger.logWarn(VCLManager.class, "transcodeMedia", String.format(
+					"File(%s) is 0 length or doesn't exist", outputFile.getAbsolutePath()));
 			return outputFile.length();
 		}
 		catch(Exception e)
 		{
 			Logger.logErr(VCLManager.class, "transcodeMedia", e);
-			throw e;
+			return 0;
 		}
 		finally
 		{
@@ -76,7 +84,8 @@ public class VCLManager
 				inputEaterThread.setQuit();
 			if(errorEaterThread != null)
 				errorEaterThread.setQuit();
-			process.destroy();
+			if(process != null)
+				process.destroy();
 		}
 	}
 
