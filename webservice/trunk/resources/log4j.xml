@@ -11,9 +11,7 @@
 	<appender name="Email" class="org.apache.log4j.net.SMTPAppender">
 		<param name="evaluatorClass" value="com.inetvod.common.core.LoggerWarnEvaluator"/>
 		<param name="BufferSize" value="10"/>
-		<param name="SMTPHost" value="smtpout.secureserver.net"/>
-		<param name="SMTPUsername" value="ops@inetvod.com"/>
-		<param name="SMTPPassword" value="0p3r@ti0ns"/>
+		<param name="SMTPHost" value="k2smtpout.secureserver.net"/>
 		<param name="From" value="ops@inetvod.com"/>
 		<param name="To" value="ops@inetvod.com"/>
 		<param name="Subject" value="iNetVOD-contmgr-webservice: Logger Message"/>
