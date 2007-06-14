@@ -1,17 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/docs/api/org/apache/log4j/xml/log4j.dtd">
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
-	<appender name="FileLog" class="org.apache.log4j.FileAppender">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"><!-- debug="true"-->
+	<appender name="FileLog" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="file" value="/program files/inetvod/logs/contmgr/webservice/webservice.log"/>
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss}|%p|%c{2}.%m%n" />
 		</layout>
 	</appender>
+	<appender name="Email" class="org.apache.log4j.net.SMTPAppender">
+		<param name="evaluatorClass" value="com.inetvod.common.core.LoggerWarnEvaluator"/>
+		<param name="BufferSize" value="10"/>
+		<param name="SMTPHost" value="smtpout.secureserver.net"/>
+		<param name="SMTPUsername" value="ops@inetvod.com"/>
+		<param name="SMTPPassword" value="0p3r@ti0ns"/>
+		<param name="From" value="ops@inetvod.com"/>
+		<param name="To" value="ops@inetvod.com"/>
+		<param name="Subject" value="iNetVOD-contmgr-webservice: Logger Message"/>
+		<param name="SMTPDebug" value="true"/>
+		<layout class="org.apache.log4j.HTMLLayout"/>
+	</appender>
 	<category name="com.inetvod">
 		<level value="debug"/>
 		<appender-ref ref="FileLog"/>
+		<appender-ref ref="Email"/>
 	</category>
 	<category name="org.apache">
+		<level value="info"/>
+		<appender-ref ref="FileLog"/>
+	</category>
+	<category name="httpclient">
 		<level value="info"/>
 		<appender-ref ref="FileLog"/>
 	</category>
