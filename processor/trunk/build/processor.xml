@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties version="1.0">
+	<entry key="dbconnect">/program files/inetvod/contmgr/dbconnect.xml</entry>
+	<entry key="log4j">log4j.xml</entry>
+	<entry key="logdir">/program files/inetvod/logs/contmgr/processor</entry>
+	<entry key="contentDir">/program files/inetvod/contmgr/content</entry>
+	<entry key="maxLocalStorageGigs">1</entry>
+	<entry key="retryCount">5</entry>
+	<entry key="downloadTimeoutSecs">30</entry>
+	<entry key="vlcapp">/program files/videolan/vlc/vlc.exe</entry>
+	<entry key="vlcapp_logoutput">false</entry>
+	<entry key="transcodecommand_WMV2">-I dummy --quiet -vvv "%s" --sout "#transcode{vcodec=WMV2,scale=1,acodec=mp3}:standard{access=file,mux=asf,dst='%s'}" vlc:quit</entry>
+</properties>

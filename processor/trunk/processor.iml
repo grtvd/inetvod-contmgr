@@ -30,11 +30,15 @@
         <attribute name="method" value="2" />
         <attribute name="URI" value="/" />
       </containerElement>
+      <containerElement type="library" name="jaf-1.0.2" level="application">
+        <attribute name="method" value="2" />
+        <attribute name="URI" value="/" />
+      </containerElement>
       <containerElement type="library" name="javamail-1.3.2" level="application">
         <attribute name="method" value="2" />
         <attribute name="URI" value="/" />
       </containerElement>
-      <containerElement type="library" name="logging-log4j-1.2.11" level="application">
+      <containerElement type="library" name="logging-log4j-1.2.14" level="application">
         <attribute name="method" value="2" />
         <attribute name="URI" value="/" />
       </containerElement>
@@ -65,15 +69,16 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="commons-logging-1.0.4" level="application" />
-    <orderEntry type="library" name="logging-log4j-1.2.11" level="application" />
-    <orderEntry type="library" name="commons-pool-1.2" level="application" />
-    <orderEntry type="library" name="microsoft sql server 2005 jdbc driver" level="application" />
-    <orderEntry type="library" name="commons-dbcp-1.2.1" level="application" />
     <orderEntry type="library" name="commons-codec-1.3" level="application" />
-    <orderEntry type="library" name="javamail-1.3.2" level="application" />
     <orderEntry type="library" name="commons-collections-3.1" level="application" />
+    <orderEntry type="library" name="commons-dbcp-1.2.1" level="application" />
     <orderEntry type="library" name="commons-httpclient-3.0-rc3" level="application" />
+    <orderEntry type="library" name="commons-logging-1.0.4" level="application" />
+    <orderEntry type="library" name="commons-pool-1.2" level="application" />
+    <orderEntry type="library" name="logging-log4j-1.2.14" level="application" />
+    <orderEntry type="library" name="jaf-1.0.2" level="application" />
+    <orderEntry type="library" name="javamail-1.3.2" level="application" />
+    <orderEntry type="library" name="microsoft sql server 2005 jdbc driver" level="application" />
     <orderEntryProperties />
   </component>
 </module>

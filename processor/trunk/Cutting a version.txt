@@ -1,0 +1,35 @@
+* contmgr processor:
+
+- In IDEA
+	- Open process.ipr
+	- Run "Build -> Build Jars..."
+	- Will create "C:\projects\iNetVOD\contmgr\processor\trunk\build\processor.jar"
+	- Close IDEA
+
+- Comfirm files in Build folder
+	- Check for current versions in "C:\projects\iNetVOD\contmgr\processor\trunk\build".
+		- processor.xml
+		- log4j.xml
+		- libs
+
+- Commit all changed files, use label: "contmgr: (processor) Cut version CCYY-MM-DD."
+
+- Deploy to Server
+	- Copy to local FTP, copy down from apiservice.inetvod.com.
+		- ftp://alpha.inetvod.com
+
+	- Copy files to "C:\Program Files\iNetVOD\contmgr\processor".
+
+	- Confirm dbconnect.xml in "C:\Program Files\iNetVOD\contmgr".
+
+	- Confirm VCL version 0.8.6b at "C:\Program Files\VideoLAN\VLC\vlc.exe"
+
+	- Confirm Scheduled Task
+		- Run: "C:\Program Files\Java\jre1.5.0_06\bin\java.exe" -jar "C:\Program Files\iNetVOD\contmgr\processor\processor.jar"
+		- Start in: "C:\Program Files\iNetVOD\contmgr\processor"
+		- Run as: APISERVER\inetvod
+		- Run every 6 hours starting at 4:30 AM MT. (1/2 hour after apiprocessor)
+
+
+- Steps for next update only (remove these items after each deployment)
+	(none)
