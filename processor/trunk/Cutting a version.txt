@@ -28,7 +28,7 @@
 		- Run: "C:\Program Files\Java\jre1.5.0_06\bin\java.exe" -jar "C:\Program Files\iNetVOD\contmgr\processor\processor.jar"
 		- Start in: "C:\Program Files\iNetVOD\contmgr\processor"
 		- Run as: APISERVER\inetvod
-		- Run every 6 hours starting at 4:30 AM MT. (1/2 hour after apiprocessor)
+		- Run: Every 2 minute(s) from 12:00 AM for 24 hour(s) every day.
 
 
 - Steps for next update only (remove these items after each deployment)
