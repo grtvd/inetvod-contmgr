@@ -32,4 +32,6 @@
 
 
 - Steps for next update only (remove these items after each deployment)
-	(none)
+	- Install MediaInfo DLL
+	- Install JNative
+		- Update PATH to include C:\projects\JNative-1.3.2 (see vladium-timer)

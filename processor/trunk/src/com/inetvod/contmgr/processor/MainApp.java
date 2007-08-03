@@ -18,6 +18,7 @@ import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
 import com.inetvod.contmgr.dbdata.ContentItemList;
+import com.inetvod.contmgr.processor.mediainfo.MediaInfoManager;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -94,6 +95,8 @@ public class MainApp
 
 		VCLManager.initialize(properties.getProperty("vlcapp"), transcodeCommands,
 			Boolean.parseBoolean(properties.getProperty("vlcapp_logoutput")));
+
+		MediaInfoManager.initialize(properties.getProperty("mediainfodll"));
 	}
 
 	private static boolean processArgs(String[] args)

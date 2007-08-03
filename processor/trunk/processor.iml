@@ -38,6 +38,10 @@
         <attribute name="method" value="2" />
         <attribute name="URI" value="/" />
       </containerElement>
+      <containerElement type="library" name="JNative-1.3.2" level="application">
+        <attribute name="method" value="2" />
+        <attribute name="URI" value="/" />
+      </containerElement>
       <containerElement type="library" name="logging-log4j-1.2.14" level="application">
         <attribute name="method" value="2" />
         <attribute name="URI" value="/" />
@@ -79,6 +83,7 @@
     <orderEntry type="library" name="jaf-1.0.2" level="application" />
     <orderEntry type="library" name="javamail-1.3.2" level="application" />
     <orderEntry type="library" name="microsoft sql server 2005 jdbc driver" level="application" />
+    <orderEntry type="library" name="JNative-1.3.2" level="application" />
     <orderEntryProperties />
   </component>
 </module>
