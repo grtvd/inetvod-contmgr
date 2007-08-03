@@ -8,15 +8,19 @@ import java.util.HashMap;
 
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
+import com.inetvod.contmgr.data.AudioCodec;
+import com.inetvod.contmgr.data.VideoCodec;
 import net.sourceforge.mediainfo.MediaInfo;
 
 public class MediaInfoItem
 {
 	/* Fields */
-	private static HashMap<String, String> fCodecMap;
+	private static HashMap<String, VideoCodec> fVideoCodecMap;
+	private static HashMap<String, AudioCodec> fAudioCodecMap;
 
 	private String fFileName;
-	private String fCodec;
+	private VideoCodec fVideoCodec;
+	private AudioCodec fAudioCodec;
 	private Integer fWidth;
 	private Integer fHeight;
 	private Float fFrameRate;	// frames per second
@@ -24,7 +28,8 @@ public class MediaInfoItem
 	private Integer fPlayTime;	// milli-seconds
 
 	/* Getters and Setters */
-	public String getCodec() { return fCodec; }
+	public VideoCodec getVideoCodec() { return fVideoCodec; }
+	public AudioCodec getAudioCodec() { return fAudioCodec; }
 	public Integer getWidth() { return fWidth; }
 	public Integer getHeight() { return fHeight; }
 	public Float getFrameRate() { return fFrameRate; }
@@ -34,12 +39,18 @@ public class MediaInfoItem
 	/* Construction */
 	static
 	{
-		fCodecMap = new HashMap<String, String>();
-		fCodecMap.put("avc1","avc1");	//.mp4
-		fCodecMap.put("20","mp4v");		//.mp4
-		fCodecMap.put("40","mp4a");		//.m4a
-		fCodecMap.put("MPA1L3","mpga");	//.mp3
-		fCodecMap.put("MPA2L3","mpga");	//.mp3
+		fVideoCodecMap = new HashMap<String, VideoCodec>();
+		fVideoCodecMap.put("WMV1", VideoCodec.WMV1);	//.wmv
+		fVideoCodecMap.put("WMV2", VideoCodec.WMV2);	//.wmv
+		fVideoCodecMap.put("WMV3", VideoCodec.WMV3);	//.wmv
+		fVideoCodecMap.put("avc1", VideoCodec.AVC1);	//.mp4
+		fVideoCodecMap.put("20", VideoCodec.MP4V);		//.mp4
+
+		fAudioCodecMap = new HashMap<String, AudioCodec>();
+		fAudioCodecMap.put("40", AudioCodec.M4A);		//.m4a
+		fAudioCodecMap.put("MPA1L3", AudioCodec.MP3);	//.mp3
+		fAudioCodecMap.put("MPA2L3", AudioCodec.MP3);	//.mp3
+		fAudioCodecMap.put("55", AudioCodec.MP3);	//.mp3
 	}
 
 	private MediaInfoItem(String fileName)
@@ -62,20 +73,21 @@ public class MediaInfoItem
 
 			mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_General, 0, "PlayTime", MediaInfo.Info_Text));
 
-			mediaInfoItem.fCodec = confirmCodec(mediaInfo.Get(MediaInfo.Stream_Video, 0, "Codec/CC", MediaInfo.Info_Text));
-			if(!StrUtil.hasLen(mediaInfoItem.fCodec))
-			{
-				mediaInfoItem.fCodec = confirmCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec/cc", MediaInfo.Info_Text));
-				if(!StrUtil.hasLen(mediaInfoItem.fCodec))
-					mediaInfoItem.fCodec = confirmCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec", MediaInfo.Info_Text));
-				if(!StrUtil.hasLen(mediaInfoItem.fCodec))
-					throw new Exception(String.format("Failed to get codec for file(%s)", fileName));
+			AudioCodec audioCodec = confirmAudioCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec/cc", MediaInfo.Info_Text));
+			if(audioCodec == null)
+				audioCodec = confirmAudioCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec", MediaInfo.Info_Text));
 
+			if(audioCodec != null)
+			{
+				mediaInfoItem.fAudioCodec = audioCodec;
 				if(mediaInfoItem.fPlayTime == null)
 					mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "PlayTime", MediaInfo.Info_Text));
 			}
-			else
+
+			VideoCodec videoCodec = confirmVideoCodec(mediaInfo.Get(MediaInfo.Stream_Video, 0, "Codec/CC", MediaInfo.Info_Text));
+			if(videoCodec != null)
 			{
+				mediaInfoItem.fVideoCodec = videoCodec;
 				mediaInfoItem.fWidth = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, 0, "Width", MediaInfo.Info_Text));
 				mediaInfoItem.fHeight = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, 0, "Height", MediaInfo.Info_Text));
 				mediaInfoItem.fFrameRate = parseFloat(mediaInfo.Get(MediaInfo.Stream_Video, 0, "FrameRate", MediaInfo.Info_Text));
@@ -83,6 +95,9 @@ public class MediaInfoItem
 				if(mediaInfoItem.fPlayTime == null)
 					mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, 0, "PlayTime", MediaInfo.Info_Text));
 			}
+
+			if((videoCodec == null) && (audioCodec == null))
+				throw new Exception(String.format("Failed to get codec for file(%s)", fileName));
 		}
 		finally
 		{
@@ -94,11 +109,21 @@ public class MediaInfoItem
 		return mediaInfoItem;
 	}
 
-	private static String confirmCodec(String codec)
+	private static VideoCodec confirmVideoCodec(String videoCodec)
 	{
-		String mappedCodec = fCodecMap.get(codec);
-		if(mappedCodec == null)
-			Logger.logInfo(MediaInfoItem.class, "confirmCodec", String.format("No match for codec(%s)", codec));
+		VideoCodec mappedCodec = fVideoCodecMap.get(videoCodec);
+		if((mappedCodec == null) && StrUtil.hasLen(videoCodec))
+			Logger.logInfo(MediaInfoItem.class, "confirmVideoCodec", String.format("No match for video codec(%s)",
+				videoCodec));
+		return mappedCodec;
+	}
+
+	private static AudioCodec confirmAudioCodec(String audioCodec)
+	{
+		AudioCodec mappedCodec = fAudioCodecMap.get(audioCodec);
+		if((mappedCodec == null) && StrUtil.hasLen(audioCodec))
+			Logger.logInfo(MediaInfoItem.class, "confirmAudioCodec", String.format("No match for audio codec(%s)",
+				audioCodec));
 		return mappedCodec;
 	}
 
@@ -143,13 +168,14 @@ public class MediaInfoItem
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
-		sb.append(String.format("File:      %s\n", fFileName));
-		sb.append(String.format("Codec:     %s\n", fCodec));
-		sb.append(String.format("Width:     %d\n", fWidth));
-		sb.append(String.format("Height:    %d\n", fHeight));
-		sb.append(String.format("FrameRate: %f\n", fFrameRate));
-		sb.append(String.format("BitRate:   %d\n", fBitRate));
-		sb.append(String.format("PlayTime:  %d\n", fPlayTime));
+		sb.append(String.format("File:        %s\n", fFileName));
+		sb.append(String.format("Video Codec: %s\n", fVideoCodec));
+		sb.append(String.format("Audio Codec: %s\n", fAudioCodec));
+		sb.append(String.format("Width:       %d\n", fWidth));
+		sb.append(String.format("Height:      %d\n", fHeight));
+		sb.append(String.format("FrameRate:   %f\n", fFrameRate));
+		sb.append(String.format("BitRate:     %d\n", fBitRate));
+		sb.append(String.format("PlayTime:    %d\n", fPlayTime));
 		sb.append("\n");
 
 		Logger.logInfo(MediaInfoItem.class, "print", sb.toString());
