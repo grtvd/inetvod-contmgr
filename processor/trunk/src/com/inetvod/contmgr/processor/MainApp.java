@@ -18,6 +18,7 @@ import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
 import com.inetvod.contmgr.dbdata.ContentItemList;
+import com.inetvod.contmgr.processor.mediainfo.MediaInfoItem;
 import com.inetvod.contmgr.processor.mediainfo.MediaInfoManager;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -27,6 +28,7 @@ public class MainApp
 {
 	/* Constants */
 	private static final long BYTES_PER_GIGABYTE = 1073741824;
+	private static final int KILOS = 1000;
 	private static final int MILLIS_PER_SECOND = 1000;
 
 	/* Fields */
@@ -139,6 +141,7 @@ public class MainApp
 			if(ContentItemStatus.ToDownload.equals(contentItem.getStatus()))
 			{
 				downloadContent(contentItemList.get(0));
+				determineContentInfo(contentItem);
 			}
 			else
 			{
@@ -151,10 +154,12 @@ public class MainApp
 				else if(!ContentItemStatus.Local.equals(sourceContentItem.getStatus()))
 				{
 					downloadContent(sourceContentItem);
+					determineContentInfo(sourceContentItem);
 				}
 				else
 				{
 					transcodeContent(sourceContentItem, contentItem);
+					determineContentInfo(contentItem);
 				}
 			}
 
@@ -265,6 +270,57 @@ public class MainApp
 			dstFile.getAbsolutePath()));
 
 		return VCLManager.transcodeMedia(srcFile, dstVideoCodec, dstFile);
+	}
+
+	private void determineContentInfo(ContentItem contentItem) throws Exception
+	{
+		String filename = (new File(fContentDir, contentItem.getLocalFilePath())).getAbsolutePath();
+		MediaInfoItem mediaInfoItem = MediaInfoManager.getFileInfo(filename);
+		if(mediaInfoItem != null)
+		{
+			contentItem.setVideoCodec(mediaInfoItem.getVideoCodec());
+			contentItem.setAudioCodec(mediaInfoItem.getAudioCodec());
+			contentItem.setHorzResolution(convertIntegerToShort(mediaInfoItem.getWidth()));
+			contentItem.setVertResolution(convertIntegerToShort(mediaInfoItem.getHeight()));
+			contentItem.setFramesPerSecond(convertFrameRate(mediaInfoItem.getFrameRate()));
+			contentItem.setBitRate(convertBitRate(mediaInfoItem.getBitRate()));
+			contentItem.setRunningTimeSecs(convertPlayTime(mediaInfoItem.getPlayTime()));
+			contentItem.update();
+		}
+	}
+
+	private static Short convertIntegerToShort(Integer value)
+	{
+		if(value == null)
+			return null;
+
+		return (short)(int)value;
+	}
+
+	private static Short convertFrameRate(Float frameRate)
+	{
+		if(frameRate == null)
+			return null;
+
+		return (short)Math.ceil(frameRate);
+	}
+
+	private static Short convertBitRate(Integer bitRate)
+	{
+		if(bitRate == null)
+			return null;
+
+		return convertIntegerToShort((int)Math.round((double)bitRate / (double)KILOS));
+	}
+
+	private static Integer convertPlayTime(Integer playTime)
+	{
+		if(playTime == null)
+			return null;
+		if(playTime == 0)
+			return 0;
+
+		return (int)(Math.ceil(playTime) / (double)MILLIS_PER_SECOND);
 	}
 
 	private void checkAndFreeLocalSpace() throws Exception

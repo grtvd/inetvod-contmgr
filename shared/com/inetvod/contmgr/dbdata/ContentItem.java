@@ -12,6 +12,7 @@ import com.inetvod.common.core.FileExtension;
 import com.inetvod.common.core.FileUtil;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.common.dbdata.DatabaseObject;
+import com.inetvod.contmgr.data.AudioCodec;
 import com.inetvod.contmgr.data.ContentItemID;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
@@ -35,7 +36,12 @@ public class ContentItem extends DatabaseObject
 	private String fLocalFilePath;
 	private Long fFileSize;
 	private VideoCodec fVideoCodec;
-	private String fAudioCodec;
+	private AudioCodec fAudioCodec;
+	private Short fHorzResolution;
+	private Short fVertResolution;
+	private Short fFramesPerSecond;
+	private Short fBitRate;
+	private Integer fRunningTimeSecs;
 	private boolean fCanRelease;
 
 	private static DatabaseAdaptor<ContentItem, ContentItemList> fDatabaseAdaptor =
@@ -74,8 +80,23 @@ public class ContentItem extends DatabaseObject
 	public VideoCodec getVideoCodec() { return fVideoCodec; }
 	public void setVideoCodec(VideoCodec videoCodec) { fVideoCodec = videoCodec; }
 
-	public String getAudioCodec() { return fAudioCodec; }
-	public void setAudioCodec(String audioCodec) { fAudioCodec = audioCodec; }
+	public AudioCodec getAudioCodec() { return fAudioCodec; }
+	public void setAudioCodec(AudioCodec audioCodec) { fAudioCodec = audioCodec; }
+
+	public Short getHorzResolution() { return fHorzResolution; }
+	public void setHorzResolution(Short horzResolution) { fHorzResolution = horzResolution; }
+
+	public Short getVertResolution() { return fVertResolution; }
+	public void setVertResolution(Short vertResolution) { fVertResolution = vertResolution; }
+
+	public Short getFramesPerSecond() { return fFramesPerSecond; }
+	public void setFramesPerSecond(Short framesPerSecond) { fFramesPerSecond = framesPerSecond; }
+
+	public Short getBitRate() { return fBitRate; }
+	public void setBitRate(Short bitRate) { fBitRate = bitRate; }
+
+	public Integer getRunningTimeSecs() { return fRunningTimeSecs; }
+	public void setRunningTimeSecs(Integer runningTimeSecs) { fRunningTimeSecs = runningTimeSecs; }
 
 	public boolean isCanRelease() { return fCanRelease; }
 	public void setCanRelease(boolean canRelease) { fCanRelease = canRelease; }
@@ -151,7 +172,12 @@ public class ContentItem extends DatabaseObject
 		fLocalFilePath = reader.readString("LocalFilePath", LocalFilePathMaxLength);
 		fFileSize = reader.readLong("FileSize");
 		fVideoCodec = VideoCodec.convertFromString(reader.readString("VideoCodec", VideoCodecMaxLength));
-		fAudioCodec = reader.readString("AudioCodec", AudioCodecMaxLength);
+		fAudioCodec = AudioCodec.convertFromString(reader.readString("AudioCodec", AudioCodecMaxLength));
+		fHorzResolution = reader.readShort("HorzResolution");
+		fVertResolution = reader.readShort("VertResolution");
+		fFramesPerSecond = reader.readShort("FramesPerSecond");
+		fBitRate = reader.readShort("BitRate");
+		fRunningTimeSecs = reader.readInt("RunningTimeSecs");
 		fCanRelease = reader.readBooleanValue("CanRelease");
 	}
 
@@ -166,7 +192,12 @@ public class ContentItem extends DatabaseObject
 		writer.writeString("LocalFilePath", fLocalFilePath, LocalFilePathMaxLength);
 		writer.writeLong("FileSize", fFileSize);
 		writer.writeString("VideoCodec", VideoCodec.convertToString(fVideoCodec), VideoCodecMaxLength);
-		writer.writeString("AudioCodec", fAudioCodec, AudioCodecMaxLength);
+		writer.writeString("AudioCodec", AudioCodec.convertToString(fAudioCodec), AudioCodecMaxLength);
+		writer.writeShort("HorzResolution", fHorzResolution);
+		writer.writeShort("VertResolution", fVertResolution);
+		writer.writeShort("FramesPerSecond", fFramesPerSecond);
+		writer.writeShort("BitRate", fBitRate);
+		writer.writeInt("RunningTimeSecs", fRunningTimeSecs);
 		writer.writeBooleanValue("CanRelease", fCanRelease);
 	}
 

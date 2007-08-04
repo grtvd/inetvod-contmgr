@@ -100,6 +100,11 @@ CREATE TABLE [dbo].[ContentItem] (
 	[FileSize] [bigint] NULL ,
 	[VideoCodec] [varchar] (8) NULL ,
 	[AudioCodec] [varchar] (8) NULL ,
+	[HorzResolution] [smallint] NULL ,
+	[VertResolution] [smallint] NULL ,
+	[FramesPerSecond] [smallint] NULL ,
+	[BitRate] [smallint] NULL ,
+	[RunningTimeSecs] [int] NULL ,
 	[CanRelease] [bit] NOT NULL
 ) ON [PRIMARY]
 GO
