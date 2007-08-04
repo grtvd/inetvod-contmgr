@@ -24,7 +24,7 @@ public class MediaInfoItem
 	private Integer fWidth;
 	private Integer fHeight;
 	private Float fFrameRate;	// frames per second
-	private Integer fBitRate;
+	private Integer fBitRate;	// bits per second
 	private Integer fPlayTime;	// milli-seconds
 
 	/* Getters and Setters */
@@ -45,6 +45,7 @@ public class MediaInfoItem
 		fVideoCodecMap.put("WMV3", VideoCodec.WMV3);	//.wmv
 		fVideoCodecMap.put("avc1", VideoCodec.AVC1);	//.mp4
 		fVideoCodecMap.put("20", VideoCodec.MP4V);		//.mp4
+		fVideoCodecMap.put("SVQ3", VideoCodec.SVQ3);	//.mov
 
 		fAudioCodecMap = new HashMap<String, AudioCodec>();
 		fAudioCodecMap.put("40", AudioCodec.M4A);		//.m4a
@@ -113,7 +114,7 @@ public class MediaInfoItem
 	{
 		VideoCodec mappedCodec = fVideoCodecMap.get(videoCodec);
 		if((mappedCodec == null) && StrUtil.hasLen(videoCodec))
-			Logger.logInfo(MediaInfoItem.class, "confirmVideoCodec", String.format("No match for video codec(%s)",
+			Logger.logErr(MediaInfoItem.class, "confirmVideoCodec", String.format("No match for video codec(%s)",
 				videoCodec));
 		return mappedCodec;
 	}
