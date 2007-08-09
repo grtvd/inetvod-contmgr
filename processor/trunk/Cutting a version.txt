@@ -24,6 +24,10 @@
 
 	- Confirm VCL version 0.8.6b at "C:\Program Files\VideoLAN\VLC\vlc.exe"
 
+	- Confirm MediaInfo version 0.7.5.1 at "C:\Program Files\MediaInfo\MediaInfo.dll"
+	
+	- Confirm JNative version at 1.3.2 at "C:\Program Files\iNetVOD\common".
+
 	- Confirm Scheduled Task
 		- Run: "C:\Program Files\Java\jre1.5.0_06\bin\java.exe" -jar "C:\Program Files\iNetVOD\contmgr\processor\processor.jar"
 		- Start in: "C:\Program Files\iNetVOD\contmgr\processor"
@@ -32,6 +36,3 @@
 
 
 - Steps for next update only (remove these items after each deployment)
-	- Install MediaInfo DLL
-	- Install JNative
-		- Update PATH to include C:\projects\JNative-1.3.2 (see vladium-timer)
