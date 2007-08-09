@@ -124,7 +124,7 @@ public class MediaInfoItem
 	{
 		AudioCodec mappedCodec = fAudioCodecMap.get(audioCodec);
 		if((mappedCodec == null) && StrUtil.hasLen(audioCodec))
-			Logger.logInfo(MediaInfoItem.class, "confirmAudioCodec", String.format("No match for audio codec(%s)",
+			Logger.logErr(MediaInfoItem.class, "confirmAudioCodec", String.format("No match for audio codec(%s)",
 				audioCodec));
 		return mappedCodec;
 	}
