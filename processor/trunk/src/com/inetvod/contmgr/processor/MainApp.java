@@ -140,8 +140,7 @@ public class MainApp
 			contentItem = contentItemList.get(0);
 			if(ContentItemStatus.ToDownload.equals(contentItem.getStatus()))
 			{
-				downloadContent(contentItemList.get(0));
-				determineContentInfo(contentItem);
+				downloadContent(contentItem);
 			}
 			else
 			{
@@ -154,12 +153,10 @@ public class MainApp
 				else if(!ContentItemStatus.Local.equals(sourceContentItem.getStatus()))
 				{
 					downloadContent(sourceContentItem);
-					determineContentInfo(sourceContentItem);
 				}
 				else
 				{
 					transcodeContent(sourceContentItem, contentItem);
-					determineContentInfo(contentItem);
 				}
 			}
 
@@ -177,6 +174,8 @@ public class MainApp
 			contentItem.setFileSize(fileSize);
 			contentItem.setStatus(ContentItemStatus.Local);
 			contentItem.update();
+
+			determineContentInfo(contentItem);
 		}
 		//TODO for now a temporary fix, settting the RequestedAt date will move to bottom of queue, giving time to other itmes to be serviced
 		else
@@ -245,6 +244,8 @@ public class MainApp
 			dstContentItem.setFileSize(fileSize);
 			dstContentItem.setStatus(ContentItemStatus.Local);
 			dstContentItem.update();
+
+			determineContentInfo(dstContentItem);
 		}
 		//TODO for now a temporary fix, settting the RequestedAt date will move to bottom of queue, giving time to other itmes to be serviced
 		else
