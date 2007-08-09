@@ -275,18 +275,25 @@ public class MainApp
 
 	private void determineContentInfo(ContentItem contentItem) throws Exception
 	{
-		String filename = (new File(fContentDir, contentItem.getLocalFilePath())).getAbsolutePath();
-		MediaInfoItem mediaInfoItem = MediaInfoManager.getFileInfo(filename);
-		if(mediaInfoItem != null)
+		try
 		{
-			contentItem.setVideoCodec(mediaInfoItem.getVideoCodec());
-			contentItem.setAudioCodec(mediaInfoItem.getAudioCodec());
-			contentItem.setHorzResolution(convertIntegerToShort(mediaInfoItem.getWidth()));
-			contentItem.setVertResolution(convertIntegerToShort(mediaInfoItem.getHeight()));
-			contentItem.setFramesPerSecond(convertFrameRate(mediaInfoItem.getFrameRate()));
-			contentItem.setBitRate(convertBitRate(mediaInfoItem.getBitRate()));
-			contentItem.setRunningTimeSecs(convertPlayTime(mediaInfoItem.getPlayTime()));
-			contentItem.update();
+			String filename = (new File(fContentDir, contentItem.getLocalFilePath())).getAbsolutePath();
+			MediaInfoItem mediaInfoItem = MediaInfoManager.getFileInfo(filename);
+			if(mediaInfoItem != null)
+			{
+				contentItem.setVideoCodec(mediaInfoItem.getVideoCodec());
+				contentItem.setAudioCodec(mediaInfoItem.getAudioCodec());
+				contentItem.setHorzResolution(convertIntegerToShort(mediaInfoItem.getWidth()));
+				contentItem.setVertResolution(convertIntegerToShort(mediaInfoItem.getHeight()));
+				contentItem.setFramesPerSecond(convertFrameRate(mediaInfoItem.getFrameRate()));
+				contentItem.setBitRate(convertBitRate(mediaInfoItem.getBitRate()));
+				contentItem.setRunningTimeSecs(convertPlayTime(mediaInfoItem.getPlayTime()));
+				contentItem.update();
+			}
+		}
+		catch(Exception e)
+		{
+			Logger.logWarn(this, "determineContentInfo", e);
 		}
 	}
 
