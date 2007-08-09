@@ -3,7 +3,7 @@
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"><!-- debug="true"-->
 	<appender name="FileLog" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="file" value="/program files/inetvod/logs/contmgr/webservice/webservice.log"/>
-		<param name="datePattern" value="'.'yyyy-MM-dd'.log'"/>
+		<param name="datePattern" value="'.'yyyy-MM-dd"/>
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss}|%p|%c{2}.%m%n" />
 		</layout>
