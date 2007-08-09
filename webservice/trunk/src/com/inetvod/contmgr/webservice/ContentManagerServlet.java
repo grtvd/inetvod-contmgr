@@ -17,7 +17,6 @@ import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
-import com.inetvod.contmgr.data.AudioCodec;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.Info;
 import com.inetvod.contmgr.data.VideoCodec;
@@ -163,8 +162,8 @@ public class ContentManagerServlet extends HttpServlet
 
 		Info info = new Info();
 		info.setFileSize(contentItem.getFileSize());
-		info.setVideoCodec(VideoCodec.convertToString(contentItem.getVideoCodec()));
-		info.setAudioCodec(AudioCodec.convertToString(contentItem.getAudioCodec()));
+		info.setVideoCodec(contentItem.getVideoCodec());
+		info.setAudioCodec(contentItem.getAudioCodec());
 		info.setHorzResolution(contentItem.getHorzResolution());
 		info.setVertResolution(contentItem.getVertResolution());
 		info.setFramesPerSecond(contentItem.getFramesPerSecond());
