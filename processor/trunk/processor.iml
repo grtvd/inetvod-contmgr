@@ -18,7 +18,7 @@
         <attribute name="method" value="2" />
         <attribute name="URI" value="/" />
       </containerElement>
-      <containerElement type="library" name="commons-httpclient-3.0-rc3" level="application">
+      <containerElement type="library" name="commons-httpclient-3.1-rc1" level="application">
         <attribute name="method" value="2" />
         <attribute name="URI" value="/" />
       </containerElement>
