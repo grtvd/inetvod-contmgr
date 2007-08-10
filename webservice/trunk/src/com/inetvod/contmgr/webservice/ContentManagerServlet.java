@@ -13,11 +13,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.inetvod.common.core.FileExtension;
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
+import com.inetvod.contmgr.data.FileExtensionMapper;
 import com.inetvod.contmgr.data.Info;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
@@ -111,7 +113,10 @@ public class ContentManagerServlet extends HttpServlet
 
 	private static ContentItem getContentItem(String sourceURL, VideoCodec needVideoCodec, boolean statsOnly) throws Exception
 	{
-		ContentItem contentItem = ContentItem.getCreate(sourceURL, needVideoCodec);
+		FileExtension defaultFileExtension = null;
+		if(needVideoCodec != null)
+			defaultFileExtension = FileExtensionMapper.getDefaultForVideoCodec(needVideoCodec);
+		ContentItem contentItem = ContentItem.getCreate(sourceURL, needVideoCodec, defaultFileExtension);
 
 		if((!statsOnly && ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
 			|| ContentItemStatus.Error.equals(contentItem.getStatus()))
@@ -129,7 +134,7 @@ public class ContentManagerServlet extends HttpServlet
 			// is source needed?
 			if(ContentItemStatus.ToTranscode.equals(contentItem.getStatus()))
 			{
-				ContentItem sourceContentItem = ContentItem.getCreate(sourceURL, null);
+				ContentItem sourceContentItem = ContentItem.getCreate(sourceURL);
 
 				if(ContentItemStatus.NotLocal.equals(sourceContentItem.getStatus())
 					|| ContentItemStatus.Error.equals(sourceContentItem.getStatus()))

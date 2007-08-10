@@ -102,7 +102,7 @@ public class ContentItem extends DatabaseObject
 	public void setCanRelease(boolean canRelease) { fCanRelease = canRelease; }
 
 	/* Construction */
-	private ContentItem(String sourceURL, VideoCodec needVideoCodec)
+	private ContentItem(String sourceURL, VideoCodec needVideoCodec, FileExtension defaultFileExtension)
 	{
 		super(true);
 		fContentItemID = ContentItemID.newInstance();
@@ -121,7 +121,7 @@ public class ContentItem extends DatabaseObject
 		if(fNeedVideoCodec == null)
 			fileExtension = FileUtil.determineFileExtFromURL(sourceURL);
 		else
-			fileExtension = fNeedVideoCodec.getDefaultFileExtension();
+			fileExtension = defaultFileExtension;
 		fLocalFilePath = String.format("%s/%s", localFileName.substring(0,3),
 			FileUtil.buildFileName(localFileName, fileExtension));
 	}
@@ -132,22 +132,23 @@ public class ContentItem extends DatabaseObject
 		readFrom(reader);
 	}
 
-	public static ContentItem newInstance(String sourceURL, VideoCodec needVideoCodec)
+	public static ContentItem newInstance(String sourceURL, VideoCodec needVideoCodec, FileExtension defaultFileExtension)
 	{
-		return new ContentItem(sourceURL, needVideoCodec);
+		return new ContentItem(sourceURL, needVideoCodec, defaultFileExtension);
 	}
 
 	public static ContentItem newInstance(String sourceURL)
 	{
-		return newInstance(sourceURL, null);
+		return newInstance(sourceURL, null, null);
 	}
 
-	public static ContentItem getCreate(String sourceURL, VideoCodec needVideoCodec) throws Exception
+	public static ContentItem getCreate(String sourceURL, VideoCodec needVideoCodec, FileExtension defaultFileExtension)
+		throws Exception
 	{
 		ContentItemList contentItemList = ContentItemList.findBySourceURLNeedVideoCodec(sourceURL, needVideoCodec);
 
 		if(contentItemList.size() == 0)
-			return newInstance(sourceURL, needVideoCodec);
+			return newInstance(sourceURL, needVideoCodec, defaultFileExtension);
 		if(contentItemList.size() == 1)
 			return contentItemList.get(0);
 
@@ -157,7 +158,7 @@ public class ContentItem extends DatabaseObject
 
 	public static ContentItem getCreate(String sourceURL) throws Exception
 	{
-		return getCreate(sourceURL, null);
+		return getCreate(sourceURL, null, null);
 	}
 
 	/* Implementation */
