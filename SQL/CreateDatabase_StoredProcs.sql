@@ -69,6 +69,7 @@ CREATE PROCEDURE dbo.ContentItem_Insert
 	@RetryCount smallint,
 	@LocalFilePath varchar(64),
 	@FileSize bigint,
+	@MediaMIME varchar(32),
 	@VideoCodec varchar(8),
 	@AudioCodec varchar(8),
 	@HorzResolution smallint,
@@ -88,6 +89,7 @@ AS
 		RetryCount,
 		LocalFilePath,
 		FileSize,
+		MediaMIME,
 		VideoCodec,
 		AudioCodec,
 		HorzResolution,
@@ -107,6 +109,7 @@ AS
 		@RetryCount,
 		@LocalFilePath,
 		@FileSize,
+		@MediaMIME,
 		@VideoCodec,
 		@AudioCodec,
 		@HorzResolution,
@@ -129,6 +132,7 @@ CREATE PROCEDURE dbo.ContentItem_Update
 	@RetryCount smallint,
 	@LocalFilePath varchar(64),
 	@FileSize bigint,
+	@MediaMIME varchar(32),
 	@VideoCodec varchar(8),
 	@AudioCodec varchar(8),
 	@HorzResolution smallint,
@@ -146,6 +150,7 @@ AS
 		RetryCount = @RetryCount,
 		LocalFilePath = @LocalFilePath,
 		FileSize = @FileSize,
+		MediaMIME = @MediaMIME,
 		VideoCodec = @VideoCodec,
 		AudioCodec = @AudioCodec,
 		HorzResolution = @HorzResolution,
@@ -164,7 +169,7 @@ CREATE PROCEDURE dbo.ContentItemList_GetBySourceURLNeedVideoCodec
 	@NeedVideoCodec varchar(8)
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec,
+		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
 		HorzResolution, VertResolution, FramesPerSecond, BitRate,
 		RunningTimeSecs, CanRelease
 	from ContentItem
@@ -176,7 +181,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetByOldestStatusToDownloadOrTranscode
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec,
+		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
 		HorzResolution, VertResolution, FramesPerSecond, BitRate,
 		RunningTimeSecs, CanRelease
 	from ContentItem
@@ -198,7 +203,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetBySoloLocal
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec,
+		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
 		HorzResolution, VertResolution, FramesPerSecond, BitRate,
 		RunningTimeSecs, CanRelease
 	from ContentItem
@@ -216,7 +221,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetBySoloLocalNoToTranscode
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec,
+		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
 		HorzResolution, VertResolution, FramesPerSecond, BitRate,
 		RunningTimeSecs, CanRelease
 	from ContentItem
@@ -233,7 +238,7 @@ GO
 CREATE PROCEDURE dbo.ContentItemList_GetByLocalWasTranscoded
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
-		RetryCount, LocalFilePath, FileSize, VideoCodec, AudioCodec,
+		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
 		HorzResolution, VertResolution, FramesPerSecond, BitRate,
 		RunningTimeSecs, CanRelease
 	from ContentItem

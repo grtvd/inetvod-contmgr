@@ -10,6 +10,7 @@ import com.inetvod.common.core.DataReader;
 import com.inetvod.common.core.DataWriter;
 import com.inetvod.common.core.FileExtension;
 import com.inetvod.common.core.FileUtil;
+import com.inetvod.common.data.MediaMIME;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.common.dbdata.DatabaseObject;
 import com.inetvod.contmgr.data.AudioCodec;
@@ -23,8 +24,6 @@ public class ContentItem extends DatabaseObject
 	private static final int SourceURLMaxLength = 892;
 	private static final int NeedVideoCodecMaxLength = 8;
 	private static final int LocalFilePathMaxLength = 64;
-	private static final int VideoCodecMaxLength = 8;
-	private static final int AudioCodecMaxLength = 8;
 
 	/* Fields */
 	private ContentItemID fContentItemID;
@@ -35,6 +34,7 @@ public class ContentItem extends DatabaseObject
 	private short fRetryCount;
 	private String fLocalFilePath;
 	private Long fFileSize;
+	private MediaMIME fMediaMIME;
 	private VideoCodec fVideoCodec;
 	private AudioCodec fAudioCodec;
 	private Short fHorzResolution;
@@ -76,6 +76,9 @@ public class ContentItem extends DatabaseObject
 
 	public Long getFileSize() { return fFileSize; }
 	public void setFileSize(Long fileSize) { fFileSize = fileSize; }
+
+	public MediaMIME getMediaMIME() { return fMediaMIME; } 
+	public void setMediaMIME(MediaMIME mediaMIME) { fMediaMIME = mediaMIME; }
 
 	public VideoCodec getVideoCodec() { return fVideoCodec; }
 	public void setVideoCodec(VideoCodec videoCodec) { fVideoCodec = videoCodec; }
@@ -172,8 +175,9 @@ public class ContentItem extends DatabaseObject
 		fRetryCount = reader.readShort("RetryCount");
 		fLocalFilePath = reader.readString("LocalFilePath", LocalFilePathMaxLength);
 		fFileSize = reader.readLong("FileSize");
-		fVideoCodec = VideoCodec.convertFromString(reader.readString("VideoCodec", VideoCodecMaxLength));
-		fAudioCodec = AudioCodec.convertFromString(reader.readString("AudioCodec", AudioCodecMaxLength));
+		fMediaMIME = MediaMIME.convertFromString(reader.readString("MediaMIME", MediaMIME.MaxLength));
+		fVideoCodec = VideoCodec.convertFromString(reader.readString("VideoCodec", VideoCodec.MaxLength));
+		fAudioCodec = AudioCodec.convertFromString(reader.readString("AudioCodec", AudioCodec.MaxLength));
 		fHorzResolution = reader.readShort("HorzResolution");
 		fVertResolution = reader.readShort("VertResolution");
 		fFramesPerSecond = reader.readShort("FramesPerSecond");
@@ -192,8 +196,9 @@ public class ContentItem extends DatabaseObject
 		writer.writeShort("RetryCount", fRetryCount);
 		writer.writeString("LocalFilePath", fLocalFilePath, LocalFilePathMaxLength);
 		writer.writeLong("FileSize", fFileSize);
-		writer.writeString("VideoCodec", VideoCodec.convertToString(fVideoCodec), VideoCodecMaxLength);
-		writer.writeString("AudioCodec", AudioCodec.convertToString(fAudioCodec), AudioCodecMaxLength);
+		writer.writeString("MediaMIME", MediaMIME.convertToString(fMediaMIME), MediaMIME.MaxLength);
+		writer.writeString("VideoCodec", VideoCodec.convertToString(fVideoCodec), VideoCodec.MaxLength);
+		writer.writeString("AudioCodec", AudioCodec.convertToString(fAudioCodec), AudioCodec.MaxLength);
 		writer.writeShort("HorzResolution", fHorzResolution);
 		writer.writeShort("VertResolution", fVertResolution);
 		writer.writeShort("FramesPerSecond", fFramesPerSecond);

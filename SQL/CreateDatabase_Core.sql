@@ -98,6 +98,7 @@ CREATE TABLE [dbo].[ContentItem] (
 	[RetryCount] [smallint] NOT NULL ,
 	[LocalFilePath] [varchar] (64) NULL ,
 	[FileSize] [bigint] NULL ,
+	[MediaMIME] [varchar] (32) NULL,
 	[VideoCodec] [varchar] (8) NULL ,
 	[AudioCodec] [varchar] (8) NULL ,
 	[HorzResolution] [smallint] NULL ,

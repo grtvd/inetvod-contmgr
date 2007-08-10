@@ -13,6 +13,7 @@ import java.util.Properties;
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
+import com.inetvod.common.data.MediaMIME;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
@@ -20,6 +21,8 @@ import com.inetvod.contmgr.dbdata.ContentItem;
 import com.inetvod.contmgr.dbdata.ContentItemList;
 import com.inetvod.contmgr.processor.mediainfo.MediaInfoItem;
 import com.inetvod.contmgr.processor.mediainfo.MediaInfoManager;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -27,6 +30,21 @@ import org.apache.commons.httpclient.methods.GetMethod;
 public class MainApp
 {
 	/* Constants */
+	private static class DownloadFileInfo
+	{
+		private long fFileSize;
+		private String fContentType;
+
+		public long getFileSize() { return fFileSize; }
+		public String getContentType() { return fContentType; }
+
+		public DownloadFileInfo(long fileSize, String contentType)
+		{
+			fFileSize = fileSize;
+			fContentType = contentType;
+		}
+	}
+
 	private static final long BYTES_PER_GIGABYTE = 1073741824;
 	private static final int KILOS = 1000;
 	private static final int MILLIS_PER_SECOND = 1000;
@@ -168,10 +186,11 @@ public class MainApp
 
 	private void downloadContent(ContentItem contentItem) throws Exception
 	{
-		long fileSize = downloadFile(contentItem.getSourceURL(), contentItem.getLocalFilePath());
-		if(fileSize > 0)
+		DownloadFileInfo downloadFileInfo = downloadFile(contentItem.getSourceURL(), contentItem.getLocalFilePath());
+		if(downloadFileInfo != null)
 		{
-			contentItem.setFileSize(fileSize);
+			contentItem.setFileSize(downloadFileInfo.getFileSize());
+			contentItem.setMediaMIME(MediaMIME.convertFromString(downloadFileInfo.getContentType()));
 			contentItem.setStatus(ContentItemStatus.Local);
 			contentItem.update();
 
@@ -188,7 +207,7 @@ public class MainApp
 		}
 	}
 
-	private long downloadFile(String sourceURL, String fileName) throws Exception
+	private DownloadFileInfo downloadFile(String sourceURL, String fileName) throws Exception
 	{
 		try
 		{
@@ -209,7 +228,16 @@ public class MainApp
 				if(rc != HttpStatus.SC_OK)
 				{
 					Logger.logInfo(this, "downloadFile", String.format("Bad result(%d) from url(%s)", rc, sourceURL));
-					return 0;
+					return null;
+				}
+
+				String contentType = null;
+				Header contentTypeHeader = getMethod.getResponseHeader("Content-Type");
+				if(contentTypeHeader != null)
+				{
+					HeaderElement[] contentTypeValues = contentTypeHeader.getElements();
+					if(contentTypeValues.length > 0)
+						contentType = contentTypeValues[0].getName();
 				}
 
 				file.getParentFile().mkdirs();
@@ -221,7 +249,7 @@ public class MainApp
 
 				if(!file.exists() || (file.length() == 0))
 					Logger.logWarn(this, "downloadFile", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
-				return file.length();
+				return new DownloadFileInfo(file.length(), contentType);
 			}
 			finally
 			{
@@ -231,7 +259,7 @@ public class MainApp
 		catch(Exception e)
 		{
 			Logger.logWarn(this, "downloadFile", String.format("Download failed from url(%s)", sourceURL), e);
-			return 0;
+			return null;
 		}
 	}
 
