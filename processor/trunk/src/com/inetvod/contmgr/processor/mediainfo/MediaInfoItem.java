@@ -51,6 +51,7 @@ public class MediaInfoItem
 		fAudioCodecMap.put("40", AudioCodec.M4A);		//.m4a
 		fAudioCodecMap.put("MPA1L3", AudioCodec.MP3);	//.mp3
 		fAudioCodecMap.put("MPA2L3", AudioCodec.MP3);	//.mp3
+		fAudioCodecMap.put("MPA2.5L3", AudioCodec.MP3);	//.mp3
 		fAudioCodecMap.put("55", AudioCodec.MP3);		//.mp3
 		fAudioCodecMap.put("161", AudioCodec.WMA2);		//.wma
 	}
