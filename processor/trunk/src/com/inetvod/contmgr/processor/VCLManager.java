@@ -75,7 +75,8 @@ public class VCLManager
 		}
 		catch(Exception e)
 		{
-			Logger.logErr(VCLManager.class, "transcodeMedia", e);
+			Logger.logWarn(VCLManager.class, "transcodeMedia", String.format("Transcode failed for file(%s)",
+				outputFile.getAbsolutePath()), e);
 			return 0;
 		}
 		finally

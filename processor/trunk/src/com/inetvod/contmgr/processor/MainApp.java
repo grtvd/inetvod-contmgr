@@ -208,7 +208,7 @@ public class MainApp
 				int rc = httpClient.executeMethod(getMethod);
 				if(rc != HttpStatus.SC_OK)
 				{
-					Logger.logWarn(this, "downloadFile", String.format("Bad result(%d) from url(%s)", rc, sourceURL));
+					Logger.logInfo(this, "downloadFile", String.format("Bad result(%d) from url(%s)", rc, sourceURL));
 					return 0;
 				}
 
@@ -230,7 +230,7 @@ public class MainApp
 		}
 		catch(Exception e)
 		{
-			Logger.logWarn(this, "downloadFile", e);
+			Logger.logWarn(this, "downloadFile", String.format("Download failed from url(%s)", sourceURL), e);
 			return 0;
 		}
 	}
