@@ -5,6 +5,7 @@
 package com.inetvod.contmgr.processor.mediainfo;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
@@ -16,6 +17,7 @@ public class MediaInfoItem
 {
 	/* Fields */
 	private static HashMap<String, VideoCodec> fVideoCodecMap;
+	private static HashSet<String> fVideoCodecIgnored;
 	private static HashMap<String, AudioCodec> fAudioCodecMap;
 
 	private String fFileName;
@@ -47,13 +49,18 @@ public class MediaInfoItem
 		fVideoCodecMap.put("20", VideoCodec.MP4V);		//.mp4
 		fVideoCodecMap.put("SVQ3", VideoCodec.SVQ3);	//.mov
 
+		fVideoCodecIgnored = new HashSet<String>();
+		fVideoCodecIgnored.add("jpeg");
+		fVideoCodecIgnored.add("rle ");
+
 		fAudioCodecMap = new HashMap<String, AudioCodec>();
-		fAudioCodecMap.put("40", AudioCodec.M4A);		//.m4a
-		fAudioCodecMap.put("MPA1L3", AudioCodec.MP3);	//.mp3
-		fAudioCodecMap.put("MPA2L3", AudioCodec.MP3);	//.mp3
-		fAudioCodecMap.put("MPA2.5L3", AudioCodec.MP3);	//.mp3
-		fAudioCodecMap.put("55", AudioCodec.MP3);		//.mp3
-		fAudioCodecMap.put("161", AudioCodec.WMA2);		//.wma
+		fAudioCodecMap.put("40", AudioCodec.M4A);			//.m4a
+		fAudioCodecMap.put("MPA1L3", AudioCodec.MP3);		//.mp3
+		fAudioCodecMap.put("MPEG-1A L3", AudioCodec.MP3);	//.mp3
+		fAudioCodecMap.put("MPA2L3", AudioCodec.MP3);		//.mp3
+		fAudioCodecMap.put("MPA2.5L3", AudioCodec.MP3);		//.mp3
+		fAudioCodecMap.put("55", AudioCodec.MP3);			//.mp3
+		fAudioCodecMap.put("161", AudioCodec.WMA2);			//.wma
 	}
 
 	private MediaInfoItem(String fileName)
@@ -87,16 +94,22 @@ public class MediaInfoItem
 					mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "PlayTime", MediaInfo.Info_Text));
 			}
 
-			VideoCodec videoCodec = confirmVideoCodec(mediaInfo.Get(MediaInfo.Stream_Video, 0, "Codec/CC", MediaInfo.Info_Text));
-			if(videoCodec != null)
+			VideoCodec videoCodec = null;
+			int numSteams = mediaInfo.Count_Get(MediaInfo.Stream_Video);
+			for(int stream = 0; stream < numSteams; stream++)
 			{
-				mediaInfoItem.fVideoCodec = videoCodec;
-				mediaInfoItem.fWidth = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, 0, "Width", MediaInfo.Info_Text));
-				mediaInfoItem.fHeight = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, 0, "Height", MediaInfo.Info_Text));
-				mediaInfoItem.fFrameRate = parseFloat(mediaInfo.Get(MediaInfo.Stream_Video, 0, "FrameRate", MediaInfo.Info_Text));
-				mediaInfoItem.fBitRate = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, 0, "BitRate", MediaInfo.Info_Text));
-				if(mediaInfoItem.fPlayTime == null)
-					mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, 0, "PlayTime", MediaInfo.Info_Text));
+				videoCodec = confirmVideoCodec(mediaInfo.Get(MediaInfo.Stream_Video, stream, "Codec/CC", MediaInfo.Info_Text));
+				if(videoCodec != null)
+				{
+					mediaInfoItem.fVideoCodec = videoCodec;
+					mediaInfoItem.fWidth = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, stream, "Width", MediaInfo.Info_Text));
+					mediaInfoItem.fHeight = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, stream, "Height", MediaInfo.Info_Text));
+					mediaInfoItem.fFrameRate = parseFloat(mediaInfo.Get(MediaInfo.Stream_Video, stream, "FrameRate", MediaInfo.Info_Text));
+					mediaInfoItem.fBitRate = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, stream, "BitRate", MediaInfo.Info_Text));
+					if(mediaInfoItem.fPlayTime == null)
+						mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_Video, stream, "PlayTime", MediaInfo.Info_Text));
+					break;
+				}
 			}
 
 			if((videoCodec == null) && (audioCodec == null))
@@ -115,7 +128,7 @@ public class MediaInfoItem
 	private static VideoCodec confirmVideoCodec(String videoCodec)
 	{
 		VideoCodec mappedCodec = fVideoCodecMap.get(videoCodec);
-		if((mappedCodec == null) && StrUtil.hasLen(videoCodec))
+		if((mappedCodec == null) && StrUtil.hasLen(videoCodec) && !fVideoCodecIgnored.contains(videoCodec))
 			Logger.logErr(MediaInfoItem.class, "confirmVideoCodec", String.format("No match for video codec(%s)",
 				videoCodec));
 		return mappedCodec;
