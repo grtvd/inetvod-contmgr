@@ -10,11 +10,14 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Properties;
 
+import com.inetvod.common.core.FileExtension;
+import com.inetvod.common.core.FileUtil;
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
 import com.inetvod.common.data.MediaMIME;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
+import com.inetvod.contmgr.data.AudioCodec;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
@@ -309,8 +312,30 @@ public class MainApp
 			MediaInfoItem mediaInfoItem = MediaInfoManager.getFileInfo(filename);
 			if(mediaInfoItem != null)
 			{
-				contentItem.setVideoCodec(mediaInfoItem.getVideoCodec());
-				contentItem.setAudioCodec(mediaInfoItem.getAudioCodec());
+				if((mediaInfoItem.getVideoCodec() != null) || mediaInfoItem.getAudioCodec() != null)
+				{
+					contentItem.setVideoCodec(mediaInfoItem.getVideoCodec());
+					contentItem.setAudioCodec(mediaInfoItem.getAudioCodec());
+				}
+				else
+				{
+					// guess codec by MediaMIME or FileExtension
+					if(MediaMIME.audio_mpeg.equals(contentItem.getMediaMIME()))
+						contentItem.setAudioCodec(AudioCodec.MP3);
+					else
+					{
+						FileExtension fileExtension = FileUtil.determineFileExtFromFilePath(contentItem.getLocalFilePath());
+						if(fileExtension != null)
+						{
+							if(FileExtension.mp3.equals(fileExtension))
+							{
+								contentItem.setMediaMIME(MediaMIME.audio_mpeg);
+								contentItem.setAudioCodec(AudioCodec.MP3);
+							}
+						}
+					}
+				}
+
 				contentItem.setHorzResolution(convertIntegerToShort(mediaInfoItem.getWidth()));
 				contentItem.setVertResolution(convertIntegerToShort(mediaInfoItem.getHeight()));
 				contentItem.setFramesPerSecond(convertFrameRate(mediaInfoItem.getFrameRate()));

@@ -112,8 +112,8 @@ public class MediaInfoItem
 				}
 			}
 
-			if((videoCodec == null) && (audioCodec == null))
-				throw new Exception(String.format("Failed to get codec for file(%s)", fileName));
+			//if((videoCodec == null) && (audioCodec == null))
+			//	throw new Exception(String.format("Failed to get codec for file(%s)", fileName));
 		}
 		finally
 		{
