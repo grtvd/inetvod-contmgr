@@ -167,6 +167,7 @@ public class ContentManagerServlet extends HttpServlet
 
 		Info info = new Info();
 		info.setFileSize(contentItem.getFileSize());
+		info.setMediaMIME(contentItem.getMediaMIME());
 		info.setVideoCodec(contentItem.getVideoCodec());
 		info.setAudioCodec(contentItem.getAudioCodec());
 		info.setHorzResolution(contentItem.getHorzResolution());
