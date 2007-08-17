@@ -19,8 +19,8 @@ import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
-import com.inetvod.contmgr.data.FileExtensionMapper;
 import com.inetvod.contmgr.data.Info;
+import com.inetvod.contmgr.data.MediaMapper;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
 
@@ -115,7 +115,7 @@ public class ContentManagerServlet extends HttpServlet
 	{
 		FileExtension defaultFileExtension = null;
 		if(needVideoCodec != null)
-			defaultFileExtension = FileExtensionMapper.getDefaultForVideoCodec(needVideoCodec);
+			defaultFileExtension = MediaMapper.getDefaultFileExtension(needVideoCodec);
 		ContentItem contentItem = ContentItem.getCreate(sourceURL, needVideoCodec, defaultFileExtension);
 
 		if((!statsOnly && ContentItemStatus.NotLocal.equals(contentItem.getStatus()))
