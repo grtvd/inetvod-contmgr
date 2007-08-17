@@ -19,6 +19,7 @@ import com.inetvod.common.data.MediaMIME;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.AudioCodec;
 import com.inetvod.contmgr.data.ContentItemStatus;
+import com.inetvod.contmgr.data.MediaMapper;
 import com.inetvod.contmgr.data.VideoCodec;
 import com.inetvod.contmgr.dbdata.ContentItem;
 import com.inetvod.contmgr.dbdata.ContentItemList;
@@ -316,6 +317,14 @@ public class MainApp
 				{
 					contentItem.setVideoCodec(mediaInfoItem.getVideoCodec());
 					contentItem.setAudioCodec(mediaInfoItem.getAudioCodec());
+
+					if(contentItem.getMediaMIME() == null)
+					{
+						if(mediaInfoItem.getVideoCodec() != null)
+							contentItem.setMediaMIME(MediaMapper.getDefaultMediaMIME(mediaInfoItem.getVideoCodec()));
+						else
+							contentItem.setMediaMIME(MediaMapper.getDefaultMediaMIME(mediaInfoItem.getAudioCodec()));
+					}
 				}
 				else
 				{
