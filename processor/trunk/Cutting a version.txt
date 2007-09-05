@@ -15,24 +15,27 @@
 - Commit all changed files, use label: "contmgr: (processor) Cut version CCYY-MM-DD."
 
 - Deploy to Server
-	- Copy to local FTP, copy down from apiservice.inetvod.com.
-		- ftp://alpha.inetvod.com
+	- Locally
+		- Copy to C:\projects\iNetVOD-prod\contmgr\Program Files\iNetVOD\contmgr\processor
+			- Commit all changes files, use label: "contmgr: Deployed processor version CCYY-MM-DD."
 
-	- Copy files to "C:\Program Files\iNetVOD\contmgr\processor".
+	- On Server
+		- Checkout/Update "C:\Program Files\iNetVOD\common" from "svn://svn.inetvod.com/prod/contmgr/Program Files/iNetVOD/common"
+		- Checkout/Update "C:\Program Files\iNetVOD\contmgr" from "svn://svn.inetvod.com/prod/contmgr/Program Files/iNetVOD/contmgr"
 
-	- Confirm dbconnect.xml in "C:\Program Files\iNetVOD\contmgr".
+		- Confirm dbconnect.xml in "C:\Program Files\iNetVOD\contmgr".
 
-	- Confirm VCL version 0.8.6b at "C:\Program Files\VideoLAN\VLC\vlc.exe"
+		- Confirm VCL version 0.8.6b at "C:\Program Files\VideoLAN\VLC\vlc.exe"
 
-	- Confirm MediaInfo version 0.7.5.1 at "C:\Program Files\MediaInfo\MediaInfo.dll"
-	
-	- Confirm JNative version at 1.3.2 at "C:\Program Files\iNetVOD\common".
+		- Confirm MediaInfo version 0.7.5.1 at "C:\Program Files\MediaInfo\MediaInfo.dll"
 
-	- Confirm Scheduled Task
-		- Run: "C:\Program Files\Java\jre1.5.0_06\bin\java.exe" -jar "C:\Program Files\iNetVOD\contmgr\processor\processor.jar"
-		- Start in: "C:\Program Files\iNetVOD\contmgr\processor"
-		- Run as: APISERVER\inetvod
-		- Run: Every 2 minute(s) from 12:00 AM for 24 hour(s) every day.
+		- Confirm JNative version at 1.3.2 at "C:\Program Files\iNetVOD\common".
+
+		- Confirm Scheduled Task
+			- Run: "C:\Program Files\Java\jre1.5.0_06\bin\java.exe" -jar "C:\Program Files\iNetVOD\contmgr\processor\processor.jar"
+			- Start in: "C:\Program Files\iNetVOD\contmgr\processor"
+			- Run as: APISERVER\inetvod
+			- Run: Every 2 minute(s) from 12:00 AM for 24 hour(s) every day.
 
 
 - Steps for next update only (remove these items after each deployment)
