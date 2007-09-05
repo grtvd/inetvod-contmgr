@@ -29,6 +29,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.InvalidRedirectLocationException;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 public class MainApp
@@ -211,7 +212,7 @@ public class MainApp
 		}
 	}
 
-	private DownloadFileInfo downloadFile(String sourceURL, String fileName) throws Exception
+	private DownloadFileInfo downloadFile(String sourceURL, String fileName)
 	{
 		try
 		{
@@ -260,6 +261,11 @@ public class MainApp
 				getMethod.releaseConnection();
 			}
 		}
+		catch(InvalidRedirectLocationException e)
+		{
+			Logger.logInfo(this, "downloadFile", String.format("InvalidRedirectLocationException, download failed from url(%s)", sourceURL));
+			return null;
+		}
 		catch(Exception e)
 		{
 			Logger.logWarn(this, "downloadFile", String.format("Download failed from url(%s)", sourceURL), e);
@@ -305,7 +311,7 @@ public class MainApp
 		return VCLManager.transcodeMedia(srcFile, dstVideoCodec, dstFile);
 	}
 
-	private void determineContentInfo(ContentItem contentItem) throws Exception
+	private void determineContentInfo(ContentItem contentItem)
 	{
 		try
 		{
