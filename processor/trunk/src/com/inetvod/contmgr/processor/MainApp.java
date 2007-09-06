@@ -61,6 +61,9 @@ public class MainApp
 	private short fRetryCount;
 	private int fDownloadTimeoutSecs;
 
+	private boolean fDoClean;
+	private boolean fDoPurge;
+
 	/* Construction */
 	private MainApp()
 	{
@@ -72,8 +75,15 @@ public class MainApp
 		try
 		{
 			fMainApp.init();
-			if(processArgs(args))
-				fMainApp.doWork();
+			if(fMainApp.processArgs(args))
+			{
+				if(fMainApp.fDoClean)
+					fMainApp.doCleanContent();
+				else if(fMainApp.fDoPurge)
+					fMainApp.doPurgeContent();
+				else
+					fMainApp.doWork();
+			}
 			else
 				printUsage();
 		}
@@ -124,15 +134,31 @@ public class MainApp
 		MediaInfoManager.initialize(properties.getProperty("mediainfodll"));
 	}
 
-	private static boolean processArgs(String[] args)
+	private boolean processArgs(String[] args)
 	{
 		try
 		{
-			//noinspection RedundantIfStatement
 			if((args == null) || (args.length == 0))
 				return true;
 
-			return false;
+			if(args.length != 1)
+				return false;
+
+			for(int i = 0; i < args.length; i++)
+			{
+				if("-c".equals(args[i]))
+				{
+					fDoClean = true;
+				}
+				else if("-p".equals(args[i]))
+				{
+					fDoPurge = true;
+				}
+				else
+					return false;
+			}
+
+			return true;
 		}
 		catch(Exception e)
 		{
@@ -142,7 +168,9 @@ public class MainApp
 
 	private static void printUsage()
 	{
-		System.out.println("usage: process");
+		System.out.println("usage: process [options]");
+		System.out.println("   -c    Clean-up, delete files of all Error items");
+		System.out.println("   -p    Purge, delete files of all items");
 	}
 
 	private void doWork() throws Exception
@@ -387,7 +415,7 @@ public class MainApp
 		if(bitRate == null)
 			return null;
 
-		return convertIntegerToShort((int)Math.round((double)bitRate / (double)KILOS));
+		return convertIntegerToShort((int)Math.round(bitRate.doubleValue() / (double)KILOS));
 	}
 
 	private static Integer convertPlayTime(Integer playTime)
@@ -398,6 +426,33 @@ public class MainApp
 			return 0;
 
 		return (int)(Math.ceil(playTime) / (double)MILLIS_PER_SECOND);
+	}
+
+	private void doCleanContent() throws Exception
+	{
+		ContentItemList contentItemList = ContentItemList.findByError();
+
+		for(ContentItem contentItem : contentItemList)
+		{
+			deleteContentFile(contentItem);
+			contentItem.delete();
+		}
+	}
+
+	private void doPurgeContent() throws Exception
+	{
+		doCleanContent();
+
+		long maxLocalStorage = fMaxLocalStorage;
+		try
+		{
+			fMaxLocalStorage = 0;
+			checkAndFreeLocalSpace();
+		}
+		finally
+		{
+			fMaxLocalStorage = maxLocalStorage;
+		}
 	}
 
 	private void checkAndFreeLocalSpace() throws Exception
@@ -431,16 +486,22 @@ public class MainApp
 			contentItem.setStatus(ContentItemStatus.NotLocal);
 			contentItem.update();
 
-			File file = new File(fContentDir, contentItem.getLocalFilePath());
-			if(!file.delete())
-				Logger.logErr(this, "deleteContentForListUntilMaxLocalStorage", String.format(
-					"Failed to delete file '%s'", file.getAbsolutePath()));
-			if(file.getParentFile().listFiles().length == 0)
-				file.getParentFile().delete();
+			deleteContentFile(contentItem);
 
 			totalFileSize -= contentItem.getFileSize();
 		}
 
 		return totalFileSize;
+	}
+
+	private void deleteContentFile(ContentItem contentItem) throws Exception
+	{
+		File file = new File(fContentDir, contentItem.getLocalFilePath());
+		if(file.exists() && !file.delete())
+			Logger.logErr(this, "deleteContentFile", String.format("Failed to delete file '%s'",
+				file.getAbsolutePath()));
+		if((file.getParentFile() != null) && (file.getParentFile().listFiles() != null)
+				&& (file.getParentFile().listFiles().length == 0))
+			file.getParentFile().delete();
 	}
 }

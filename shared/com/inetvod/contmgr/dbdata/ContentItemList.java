@@ -64,4 +64,12 @@ public class ContentItemList extends ArrayList<ContentItem>
 	{
 		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByLocalWasTranscoded", null);
 	}
+
+	/**
+	 * Find Error items.
+	 */
+	public static ContentItemList findByError() throws Exception
+	{
+		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByError", null);
+	}
 }

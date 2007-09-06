@@ -20,6 +20,10 @@ if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentIte
 drop procedure [dbo].[ContentItem_Update]
 GO
 
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItem_Delete]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItem_Delete]
+GO
+
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetBySourceURLNeedVideoCodec]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
 drop procedure [dbo].[ContentItemList_GetBySourceURLNeedVideoCodec]
 GO
@@ -42,6 +46,10 @@ GO
 
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByLocalWasTranscoded]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
 drop procedure [dbo].[ContentItemList_GetByLocalWasTranscoded]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByError]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_GetByError]
 GO
 
 --//////////////////////////////////////////////////////////////////////////////
@@ -164,6 +172,14 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
+CREATE PROCEDURE dbo.ContentItem_Delete
+	@ContentItemID uniqueidentifier
+AS
+	delete from ContentItem where ContentItemID = @ContentItemID
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
 CREATE PROCEDURE dbo.ContentItemList_GetBySourceURLNeedVideoCodec
 	@SourceURL varchar(892),
 	@NeedVideoCodec varchar(8)
@@ -248,15 +264,31 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
+-- Find Error items
+
+CREATE PROCEDURE dbo.ContentItemList_GetByError
+AS
+	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
+		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
+		HorzResolution, VertResolution, FramesPerSecond, BitRate,
+		RunningTimeSecs, CanRelease
+	from ContentItem
+	where (Status = 'Error')
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
 GRANT EXECUTE ON [dbo].[ContMgr_ValidationQuery] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_Insert] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItem_Update] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItem_Delete] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySourceURLNeedVideoCodec] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetByOldestStatusToDownloadOrTranscode] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_CountTotalFileSizeForLocal] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySoloLocal] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySoloLocalNoToTranscode] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetByLocalWasTranscoded] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_GetByError] TO [contmgr]
 
 --//////////////////////////////////////////////////////////////////////////////
 
