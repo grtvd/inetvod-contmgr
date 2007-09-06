@@ -324,7 +324,8 @@ public class MainApp
 					contentItem.setVideoCodec(mediaInfoItem.getVideoCodec());
 					contentItem.setAudioCodec(mediaInfoItem.getAudioCodec());
 
-					if(contentItem.getMediaMIME() == null)
+					if((contentItem.getMediaMIME() == null)
+						|| MediaMIME.application_octet_stream.equals(contentItem.getMediaMIME()))
 					{
 						if(mediaInfoItem.getVideoCodec() != null)
 							contentItem.setMediaMIME(MediaMapper.getDefaultMediaMIME(mediaInfoItem.getVideoCodec()));
