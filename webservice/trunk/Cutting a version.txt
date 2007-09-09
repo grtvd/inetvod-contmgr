@@ -13,16 +13,23 @@
 - Commit all changed files, use label: "contmgr: (webservice) Cut version CCYY-MM-DD."
 
 - Deploy to Server
-	- Confirm dbconnect.xml in "C:\Program Files\iNetVOD\contmgr".
+	- Locally
+		- Copy to C:\projects\iNetVOD-prod\contmgr\Program Files\iNetVOD\contmgr\webservice
+			- Commit all changes files, use label: "contmgr: Deployed webservice version CCYY-MM-DD."
 
-	- Confirm VCL version 0.8.6b at "C:\Program Files\VideoLAN\VLC\vlc.exe"
+	- On Server
+		- Checkout/Update "C:\Program Files\iNetVOD\contmgr" from "svn://svn.inetvod.com/prod/contmgr/Program Files/iNetVOD/contmgr"
 
-	- In Firefox, open: http://api.inetvod.com/manager/html
+		- Confirm dbconnect.xml in "C:\Program Files\iNetVOD\contmgr".
 
-	- In "Applications" section, Undeploy "contmgr"
+		- Confirm VCL version 0.8.6b at "C:\Program Files\VideoLAN\VLC\vlc.exe"
 
-	- In "Deploy:WAR file to deploy", specify WAR file as:
-		- C:\projects\iNetVOD\contmgr\webservice\trunk\contmgr.war
+		- In Firefox, open: http://api.inetvod.com/manager/html
+
+		- In "Applications" section, Undeploy "contmgr"
+
+		- In "Deploy:WAR file to deploy", specify WAR file as:
+			- C:\projects\iNetVOD\contmgr\webservice\trunk\contmgr.war
 
 
 - Steps for next update only (remove these items after each deployment)
