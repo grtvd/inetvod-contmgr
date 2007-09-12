@@ -165,6 +165,13 @@ public class ContentManagerServlet extends HttpServlet
 			return;
 		}
 
+		if((contentItem.getFileSize() == null) || (contentItem.getFileSize().intValue() == 0)
+			|| (contentItem.getVideoCodec() == null) && (contentItem.getAudioCodec() == null))
+		{
+			httpServletResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
 		Info info = new Info();
 		info.setFileSize(contentItem.getFileSize());
 		info.setMediaMIME(contentItem.getMediaMIME());
