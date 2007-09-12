@@ -175,6 +175,8 @@ public class MainApp
 
 	private void doWork() throws Exception
 	{
+		processNoCodec();
+
 		while(processNextItem())
 		{
 			checkAndFreeLocalSpace();
@@ -280,9 +282,11 @@ public class MainApp
 				InputStream responseStream = getMethod.getResponseBodyAsStream();
 				StreamUtil.streamToFile(responseStream, file.getAbsolutePath());
 
-				if(!file.exists() || (file.length() == 0))
-					Logger.logWarn(this, "downloadFile", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
-				return new DownloadFileInfo(file.length(), contentType);
+				if(file.exists() && (file.length() > 0))
+					return new DownloadFileInfo(file.length(), contentType);
+
+				Logger.logWarn(this, "downloadFile", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
+				return null;
 			}
 			finally
 			{
@@ -337,6 +341,13 @@ public class MainApp
 			dstFile.getAbsolutePath()));
 
 		return VCLManager.transcodeMedia(srcFile, dstVideoCodec, dstFile);
+	}
+
+	private void processNoCodec() throws Exception
+	{
+		ContentItemList contentItemList = ContentItemList.findByLocalNoCodec();
+		for(ContentItem contentItem : contentItemList)
+			determineContentInfo(contentItem);
 	}
 
 	private void determineContentInfo(ContentItem contentItem)

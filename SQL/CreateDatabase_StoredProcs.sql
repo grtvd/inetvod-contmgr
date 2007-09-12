@@ -48,6 +48,10 @@ if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentIte
 drop procedure [dbo].[ContentItemList_GetByLocalWasTranscoded]
 GO
 
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByLocalNoCodec]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[ContentItemList_GetByLocalNoCodec]
+GO
+
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[ContentItemList_GetByError]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
 drop procedure [dbo].[ContentItemList_GetByError]
 GO
@@ -264,6 +268,21 @@ GO
 
 --//////////////////////////////////////////////////////////////////////////////
 
+-- Find Local items that have no VideoCodec or AudioCodec
+
+CREATE PROCEDURE dbo.ContentItemList_GetByLocalNoCodec
+AS
+	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
+		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
+		HorzResolution, VertResolution, FramesPerSecond, BitRate,
+		RunningTimeSecs, CanRelease
+	from ContentItem
+	where (Status = 'Local') and (VideoCodec is null) and (AudioCodec is null)
+	order by RequestedAt
+GO
+
+--//////////////////////////////////////////////////////////////////////////////
+
 -- Find Error items
 
 CREATE PROCEDURE dbo.ContentItemList_GetByError
@@ -288,6 +307,7 @@ GRANT EXECUTE ON [dbo].[ContentItemList_CountTotalFileSizeForLocal] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySoloLocal] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetBySoloLocalNoToTranscode] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetByLocalWasTranscoded] TO [contmgr]
+GRANT EXECUTE ON [dbo].[ContentItemList_GetByLocalNoCodec] TO [contmgr]
 GRANT EXECUTE ON [dbo].[ContentItemList_GetByError] TO [contmgr]
 
 --//////////////////////////////////////////////////////////////////////////////

@@ -66,6 +66,14 @@ public class ContentItemList extends ArrayList<ContentItem>
 	}
 
 	/**
+	 * Find Local items that have no VideoCodec or AudioCodec
+	 */
+	public static ContentItemList findByLocalNoCodec() throws Exception
+	{
+		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByLocalNoCodec", null);
+	}
+
+	/**
 	 * Find Error items.
 	 */
 	public static ContentItemList findByError() throws Exception
