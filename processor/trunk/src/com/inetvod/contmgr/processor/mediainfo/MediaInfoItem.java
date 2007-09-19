@@ -121,7 +121,7 @@ public class MediaInfoItem
 			try { mediaInfo.Delete(); } catch(Exception e) {}
 		}
 
-		mediaInfoItem.print();
+		//mediaInfoItem.print();
 		return mediaInfoItem;
 	}
 
@@ -180,21 +180,21 @@ public class MediaInfoItem
 		return null;
 	}
 
-	private void print()
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("\n");
-		sb.append(String.format("File:        %s\n", fFileName));
-		sb.append(String.format("Video Codec: %s\n", fVideoCodec));
-		sb.append(String.format("Audio Codec: %s\n", fAudioCodec));
-		sb.append(String.format("Width:       %d\n", fWidth));
-		sb.append(String.format("Height:      %d\n", fHeight));
-		sb.append(String.format("FrameRate:   %f\n", fFrameRate));
-		sb.append(String.format("BitRate:     %d\n", fBitRate));
-		sb.append(String.format("PlayTime:    %d\n", fPlayTime));
-		sb.append("\n");
-
-		Logger.logInfo(MediaInfoItem.class, "print", sb.toString());
-		//System.out.print(sb.toString());
-	}
+//	private void print()
+//	{
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("\n");
+//		sb.append(String.format("File:        %s\n", fFileName));
+//		sb.append(String.format("Video Codec: %s\n", fVideoCodec));
+//		sb.append(String.format("Audio Codec: %s\n", fAudioCodec));
+//		sb.append(String.format("Width:       %d\n", fWidth));
+//		sb.append(String.format("Height:      %d\n", fHeight));
+//		sb.append(String.format("FrameRate:   %f\n", fFrameRate));
+//		sb.append(String.format("BitRate:     %d\n", fBitRate));
+//		sb.append(String.format("PlayTime:    %d\n", fPlayTime));
+//		sb.append("\n");
+//
+//		Logger.logInfo(MediaInfoItem.class, "print", sb.toString());
+//		//System.out.print(sb.toString());
+//	}
 }

@@ -29,7 +29,6 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.InvalidRedirectLocationException;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 public class MainApp
@@ -248,7 +247,7 @@ public class MainApp
 		{
 			File file = new File(fContentDir, fileName);
 
-			Logger.logInfo(this, "downloadFile", String.format("Downloading '%s' to '%s'", sourceURL, file.getAbsolutePath()));
+			//Logger.logInfo(this, "downloadFile", String.format("Downloading '%s' to '%s'", sourceURL, file.getAbsolutePath()));
 
 			// Send HTTP request to server
 			HttpClient httpClient = new HttpClient();
@@ -293,14 +292,9 @@ public class MainApp
 				getMethod.releaseConnection();
 			}
 		}
-		catch(InvalidRedirectLocationException e)
-		{
-			Logger.logInfo(this, "downloadFile", String.format("InvalidRedirectLocationException, download failed from url(%s)", sourceURL));
-			return null;
-		}
 		catch(Exception e)
 		{
-			Logger.logWarn(this, "downloadFile", String.format("Download failed from url(%s)", sourceURL), e);
+			Logger.logInfo(this, "downloadFile", String.format("Download failed from url(%s)", sourceURL), e);
 			return null;
 		}
 	}
@@ -337,8 +331,8 @@ public class MainApp
 		if(dstFile.exists())
 			dstFile.delete();
 
-		Logger.logInfo(this, "transcodeFile", String.format("Transcoding '%s' to '%s'", srcFile.getAbsolutePath(),
-			dstFile.getAbsolutePath()));
+		//Logger.logInfo(this, "transcodeFile", String.format("Transcoding '%s' to '%s'", srcFile.getAbsolutePath(),
+		//	dstFile.getAbsolutePath()));
 
 		return VCLManager.transcodeMedia(srcFile, dstVideoCodec, dstFile);
 	}
