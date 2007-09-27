@@ -278,6 +278,8 @@ AS
 		RunningTimeSecs, CanRelease
 	from ContentItem
 	where (Status = 'Local') and (VideoCodec is null) and (AudioCodec is null)
+		and (MediaMIME <> 'application/x-shockwave-flash') and (MediaMIME <> 'image/jpg')
+		and (MediaMIME <> 'image/jpeg')
 	order by RequestedAt
 GO
 
