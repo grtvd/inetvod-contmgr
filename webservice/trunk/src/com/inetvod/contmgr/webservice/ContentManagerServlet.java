@@ -17,6 +17,7 @@ import com.inetvod.common.core.FileExtension;
 import com.inetvod.common.core.Logger;
 import com.inetvod.common.core.StrUtil;
 import com.inetvod.common.core.StreamUtil;
+import com.inetvod.common.data.MediaMIME;
 import com.inetvod.common.dbdata.DatabaseAdaptor;
 import com.inetvod.contmgr.data.ContentItemStatus;
 import com.inetvod.contmgr.data.Info;
@@ -166,7 +167,8 @@ public class ContentManagerServlet extends HttpServlet
 		}
 
 		if((contentItem.getFileSize() == null) || (contentItem.getFileSize().intValue() == 0)
-			|| (contentItem.getVideoCodec() == null) && (contentItem.getAudioCodec() == null))
+			|| ((contentItem.getVideoCodec() == null) && (contentItem.getAudioCodec() == null)
+				&& !MediaMIME.application_x_shockwave_flash.equals(contentItem.getMediaMIME())))
 		{
 			httpServletResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
