@@ -284,7 +284,7 @@ public class MainApp
 				if(file.exists() && (file.length() > 0))
 					return new DownloadFileInfo(file.length(), contentType);
 
-				Logger.logWarn(this, "downloadFile", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
+				Logger.logInfo(this, "downloadFile", String.format("File(%s) is 0 length or doesn't exist", file.getAbsolutePath()));
 				return null;
 			}
 			finally
