@@ -55,6 +55,7 @@ public class MediaInfoItem
 
 		fAudioCodecMap = new HashMap<String, AudioCodec>();
 		fAudioCodecMap.put("40", AudioCodec.M4A);			//.m4a
+		fAudioCodecMap.put("sowt", AudioCodec.M4A);			//.m4a
 		fAudioCodecMap.put("MPA1L3", AudioCodec.MP3);		//.mp3
 		fAudioCodecMap.put("MPEG-1A L3", AudioCodec.MP3);	//.mp3
 		fAudioCodecMap.put("MPA2L3", AudioCodec.MP3);		//.mp3
