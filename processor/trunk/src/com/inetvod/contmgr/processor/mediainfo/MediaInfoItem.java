@@ -62,6 +62,7 @@ public class MediaInfoItem
 		fAudioCodecMap.put("MPA2.5L3", AudioCodec.MP3);		//.mp3
 		fAudioCodecMap.put("55", AudioCodec.MP3);			//.mp3
 		fAudioCodecMap.put("161", AudioCodec.WMA2);			//.wma
+		fAudioCodecMap.put("AC3", AudioCodec.AC3);			//.???
 	}
 
 	private MediaInfoItem(String fileName)
