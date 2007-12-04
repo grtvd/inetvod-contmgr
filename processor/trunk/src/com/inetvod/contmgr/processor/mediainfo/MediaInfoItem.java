@@ -84,9 +84,9 @@ public class MediaInfoItem
 
 			mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_General, 0, "PlayTime", MediaInfo.Info_Text));
 
-			AudioCodec audioCodec = confirmAudioCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec/cc", MediaInfo.Info_Text));
+			AudioCodec audioCodec = mediaInfoItem.confirmAudioCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec/cc", MediaInfo.Info_Text));
 			if(audioCodec == null)
-				audioCodec = confirmAudioCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec", MediaInfo.Info_Text));
+				audioCodec = mediaInfoItem.confirmAudioCodec(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "Codec", MediaInfo.Info_Text));
 
 			if(audioCodec != null)
 			{
@@ -95,11 +95,11 @@ public class MediaInfoItem
 					mediaInfoItem.fPlayTime = parseInteger(mediaInfo.Get(MediaInfo.Stream_Audio, 0, "PlayTime", MediaInfo.Info_Text));
 			}
 
-			VideoCodec videoCodec = null;
+			VideoCodec videoCodec;
 			int numSteams = mediaInfo.Count_Get(MediaInfo.Stream_Video);
 			for(int stream = 0; stream < numSteams; stream++)
 			{
-				videoCodec = confirmVideoCodec(mediaInfo.Get(MediaInfo.Stream_Video, stream, "Codec/CC", MediaInfo.Info_Text));
+				videoCodec = mediaInfoItem.confirmVideoCodec(mediaInfo.Get(MediaInfo.Stream_Video, stream, "Codec/CC", MediaInfo.Info_Text));
 				if(videoCodec != null)
 				{
 					mediaInfoItem.fVideoCodec = videoCodec;
@@ -126,21 +126,21 @@ public class MediaInfoItem
 		return mediaInfoItem;
 	}
 
-	private static VideoCodec confirmVideoCodec(String videoCodec)
+	private VideoCodec confirmVideoCodec(String videoCodec)
 	{
 		VideoCodec mappedCodec = fVideoCodecMap.get(videoCodec);
 		if((mappedCodec == null) && StrUtil.hasLen(videoCodec) && !fVideoCodecIgnored.contains(videoCodec))
-			Logger.logErr(MediaInfoItem.class, "confirmVideoCodec", String.format("No match for video codec(%s)",
-				videoCodec));
+			Logger.logErr(MediaInfoItem.class, "confirmVideoCodec", String.format("No match for video codec(%s) for file(%s)",
+				videoCodec, fFileName));
 		return mappedCodec;
 	}
 
-	private static AudioCodec confirmAudioCodec(String audioCodec)
+	private AudioCodec confirmAudioCodec(String audioCodec)
 	{
 		AudioCodec mappedCodec = fAudioCodecMap.get(audioCodec);
 		if((mappedCodec == null) && StrUtil.hasLen(audioCodec))
-			Logger.logErr(MediaInfoItem.class, "confirmAudioCodec", String.format("No match for audio codec(%s)",
-				audioCodec));
+			Logger.logErr(MediaInfoItem.class, "confirmAudioCodec", String.format("No match for audio codec(%s) for file(%s)",
+				audioCodec, fFileName));
 		return mappedCodec;
 	}
 
