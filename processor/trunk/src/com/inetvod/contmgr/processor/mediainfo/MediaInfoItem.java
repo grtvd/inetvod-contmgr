@@ -56,6 +56,7 @@ public class MediaInfoItem
 		fAudioCodecMap = new HashMap<String, AudioCodec>();
 		fAudioCodecMap.put("40", AudioCodec.M4A);			//.m4a
 		fAudioCodecMap.put("sowt", AudioCodec.M4A);			//.m4a
+		fAudioCodecMap.put("A_AAC/MPEG4/LC", AudioCodec.M4A);//.m4a
 		fAudioCodecMap.put("MPA1L3", AudioCodec.MP3);		//.mp3
 		fAudioCodecMap.put("MPEG-1A L3", AudioCodec.MP3);	//.mp3
 		fAudioCodecMap.put("MPA2L3", AudioCodec.MP3);		//.mp3
@@ -119,8 +120,8 @@ public class MediaInfoItem
 		}
 		finally
 		{
-			try { mediaInfo.Close(); } catch(Exception e) {}
-			try { mediaInfo.Delete(); } catch(Exception e) {}
+			try { mediaInfo.Close(); } catch(Exception ignore) {}
+			try { mediaInfo.Delete(); } catch(Exception ignore) {}
 		}
 
 		//mediaInfoItem.print();
@@ -156,7 +157,7 @@ public class MediaInfoItem
 			if(intValue != 0)
 				return intValue;
 		}
-		catch(NumberFormatException e)
+		catch(NumberFormatException ignore)
 		{
 			Float floatValue = parseFloat(value);
 			if(floatValue != null)
@@ -175,7 +176,7 @@ public class MediaInfoItem
 		{
 			return Float.parseFloat(value);
 		}
-		catch(NumberFormatException e)
+		catch(NumberFormatException ignore)
 		{
 		}
 
