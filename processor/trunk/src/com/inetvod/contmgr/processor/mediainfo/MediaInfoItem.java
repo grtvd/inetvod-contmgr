@@ -48,6 +48,7 @@ public class MediaInfoItem
 		fVideoCodecMap.put("avc1", VideoCodec.AVC1);	//.mp4
 		fVideoCodecMap.put("20", VideoCodec.MP4V);		//.mp4
 		fVideoCodecMap.put("SVQ3", VideoCodec.SVQ3);	//.mov
+		fVideoCodecMap.put("MPEG-1V", VideoCodec.WMV2);//.wmv - not really WMV2 but it will run under it
 
 		fVideoCodecIgnored = new HashSet<String>();
 		fVideoCodecIgnored.add("jpeg");
@@ -65,6 +66,7 @@ public class MediaInfoItem
 		fAudioCodecMap.put("55", AudioCodec.MP3);			//.mp3
 		fAudioCodecMap.put("161", AudioCodec.WMA2);			//.wma
 		fAudioCodecMap.put("AC3", AudioCodec.AC3);			//.???
+		fAudioCodecMap.put("MPA1L2", AudioCodec.WMA2);		//.??? - not really WMA2 but it will run under it
 	}
 
 	private MediaInfoItem(String fileName)
@@ -103,6 +105,8 @@ public class MediaInfoItem
 			for(int stream = 0; stream < numSteams; stream++)
 			{
 				videoCodec = mediaInfoItem.confirmVideoCodec(mediaInfo.Get(MediaInfo.Stream_Video, stream, "Codec/CC", MediaInfo.Info_Text));
+				if(videoCodec == null)
+					videoCodec = mediaInfoItem.confirmVideoCodec(mediaInfo.Get(MediaInfo.Stream_Video, stream, "Codec", MediaInfo.Info_Text));
 				if(videoCodec != null)
 				{
 					mediaInfoItem.fVideoCodec = videoCodec;
