@@ -54,6 +54,7 @@ public class MediaInfoItem
 		fVideoCodecIgnored.add("jpeg");
 		fVideoCodecIgnored.add("rle ");
 		fVideoCodecIgnored.add("png ");
+		fVideoCodecIgnored.add("On2 VP6");
 
 		fAudioCodecMap = new HashMap<String, AudioCodec>();
 		fAudioCodecMap.put("40", AudioCodec.M4A);			//.m4a
