@@ -68,6 +68,7 @@ public class MediaInfoItem
 		fAudioCodecMap.put("161", AudioCodec.WMA2);			//.wma
 		fAudioCodecMap.put("AC3", AudioCodec.AC3);			//.???
 		fAudioCodecMap.put("MPA1L2", AudioCodec.WMA2);		//.??? - not really WMA2 but it will run under it
+		fAudioCodecMap.put("twos", AudioCodec.TWOS);		//.??? - used with QuickTime
 	}
 
 	private MediaInfoItem(String fileName)
