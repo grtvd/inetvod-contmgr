@@ -68,9 +68,13 @@ public class ContentItemList extends ArrayList<ContentItem>
 	/**
 	 * Find Local items that have no VideoCodec or AudioCodec
 	 */
-	public static ContentItemList findByLocalNoCodec() throws Exception
+	public static ContentItemList findByLocalNoCodec(short maxRetryCount) throws Exception
 	{
-		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByLocalNoCodec", null);
+		DatabaseProcParam params[] = new DatabaseProcParam[1];
+
+		params[0] = new DatabaseProcParam(Types.SMALLINT, maxRetryCount);
+
+		return ContentItem.getDatabaseAdaptor().selectManyByProc("ContentItemList_GetByLocalNoCodec", params);
 	}
 
 	/**

@@ -339,7 +339,7 @@ public class MainApp
 
 	private void processNoCodec() throws Exception
 	{
-		ContentItemList contentItemList = ContentItemList.findByLocalNoCodec();
+		ContentItemList contentItemList = ContentItemList.findByLocalNoCodec(fRetryCount);
 		for(ContentItem contentItem : contentItemList)
 			determineContentInfo(contentItem);
 	}
@@ -391,8 +391,11 @@ public class MainApp
 				contentItem.setFramesPerSecond(convertFrameRate(mediaInfoItem.getFrameRate()));
 				contentItem.setBitRate(convertBitRate(mediaInfoItem.getBitRate()));
 				contentItem.setRunningTimeSecs(convertPlayTime(mediaInfoItem.getPlayTime()));
-				contentItem.update();
 			}
+
+			if((contentItem.getVideoCodec() == null) && (contentItem.getAudioCodec() == null))
+				contentItem.incRetryCount();
+			contentItem.update();
 		}
 		catch(Exception e)
 		{

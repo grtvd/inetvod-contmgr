@@ -271,15 +271,17 @@ GO
 -- Find Local items that have no VideoCodec or AudioCodec
 
 CREATE PROCEDURE dbo.ContentItemList_GetByLocalNoCodec
+	@MaxRetryCount smallint
 AS
 	select ContentItemID, SourceURL, NeedVideoCodec, RequestedAt, Status,
 		RetryCount, LocalFilePath, FileSize, MediaMIME, VideoCodec, AudioCodec,
 		HorzResolution, VertResolution, FramesPerSecond, BitRate,
 		RunningTimeSecs, CanRelease
 	from ContentItem
-	where (Status = 'Local') and (VideoCodec is null) and (AudioCodec is null)
+	where (Status = 'Local') and (RetryCount < @MaxRetryCount)
+		and (VideoCodec is null) and (AudioCodec is null)
 		and (MediaMIME <> 'application/x-shockwave-flash') and (MediaMIME <> 'image/jpg')
-		and (MediaMIME <> 'image/jpeg')
+		and (MediaMIME <> 'image/jpeg') and (MediaMIME <> 'text/html')
 	order by RequestedAt
 GO
 
