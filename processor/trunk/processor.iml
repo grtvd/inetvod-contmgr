@@ -83,7 +83,6 @@
     <orderEntry type="library" name="javamail-1.3.2" level="application" />
     <orderEntry type="library" name="JNative-1.4RC2" level="application" />
     <orderEntry type="library" name="microsoft sql server 2005 jdbc driver" level="application" />
-    <orderEntryProperties />
   </component>
 </module>
 

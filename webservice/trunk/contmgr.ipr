@@ -33,6 +33,9 @@
       <entry name="?*.tld" />
     </wildcardResourcePatterns>
   </component>
+  <component name="CopyrightManager" default="">
+    <module2copyright />
+  </component>
   <component name="DependenciesAnalyzeManager">
     <option name="myForwardDirection" value="false" />
   </component>
@@ -53,6 +56,7 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
@@ -206,7 +210,9 @@
           <option name="m_onlyPrivateOrFinal" value="false" />
           <option name="m_ignoreEmptyMethods" value="true" />
         </inspection_tool>
-        <inspection_tool class="StringReplaceableByStringBuffer" level="WARNING" enabled="true" />
+        <inspection_tool class="StringReplaceableByStringBuffer" level="WARNING" enabled="true">
+          <option name="onlyWarnOnLoop" value="true" />
+        </inspection_tool>
         <inspection_tool class="StringConcatenationInLoops" level="WARNING" enabled="true">
           <option name="m_ignoreUnlessAssigned" value="false" />
         </inspection_tool>
@@ -388,13 +394,19 @@
       </item>
     </group>
   </component>
+  <component name="ProjectDetails">
+    <option name="projectName" value="contmgr" />
+  </component>
   <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectKey">
+    <option name="state" value="svn://svnhome/dev/contmgr/webservice/trunk/contmgr.ipr" />
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/contmgr.iml" filepath="$PROJECT_DIR$/contmgr.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="java version &quot;1.5.0_12&quot;" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="java version &quot;1.5.0_12&quot;" project-jdk-type="JavaSDK" />
   <component name="ResourceManagerContainer">
     <option name="myResourceBundles">
       <value>
@@ -410,7 +422,8 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
   <component name="SvnBranchConfigurationManager">
-    <option name="myVersion" value="123" />
+    <option name="myVersion" value="124" />
+    <option name="mySupportsUserInfoFilter" value="true" />
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
